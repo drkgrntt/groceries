@@ -66,9 +66,16 @@ class _GroceryListState extends State<GroceryList> {
         child: ListTile(
           title: Text(record.item),
           trailing: Text(record.quantity.toString()),
-          onTap: () {
-            record.reference.updateData({'quantity': record.quantity + 1});
-          },
+          onTap: () => Firestore.instance.runTransaction((transaction) async {
+            
+            final freshSnapshot = await transaction.get(record.reference);
+            final fresh = Record.fromSnapshot(freshSnapshot);
+
+            await transaction.update(
+              record.reference,
+              {'quantity': fresh.quantity + 1}
+            );
+          }),
         ),
       ),
     );
