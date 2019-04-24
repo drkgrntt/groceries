@@ -9,8 +9,12 @@ class GroceriesBloc {
 
   final _repository = Repository();
   final _groceries = PublishSubject<List<GroceryModel>>();
+  final _groceryInputText = BehaviorSubject<String>();
 
   Observable<List<GroceryModel>> get groceries => _groceries.stream;
+  Stream<String> get groceryInputText => _groceryInputText.stream;
+
+  Function(String) get changeGroceryInputText => _groceryInputText.sink.add;
 
 
   void fetchGroceries() {
@@ -36,5 +40,6 @@ class GroceriesBloc {
   void dispose() async {
 
     await _groceries.close();
+    await _groceryInputText.close();
   }
 }

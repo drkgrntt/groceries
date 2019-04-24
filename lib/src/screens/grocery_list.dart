@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/grocery_model.dart';
 import '../blocs/groceries_provider.dart';
 import '../widgets/grocery_list_item.dart';
+import '../widgets/grocery_item_input.dart';
 
 
 class GroceryList extends StatelessWidget {
@@ -15,7 +16,12 @@ class GroceryList extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text('Grocery List')),
-      body: _buildBody(groceriesBloc),
+      body: Column(
+        children: [
+          _buildBody(groceriesBloc),
+          GroceryItemInput(),
+        ],
+      ),
     );
   }
 
@@ -38,9 +44,11 @@ class GroceryList extends StatelessWidget {
 
   Widget _buildList(BuildContext context, List<GroceryModel> snapshot) {
 
-    return ListView(
-      padding: const EdgeInsets.only(top: 20.0),
-      children: snapshot.map((data) => _buildListItem(context, data)).toList(),
+    return Flexible(
+      child: ListView(
+        padding: const EdgeInsets.only(top: 20.0),
+        children: snapshot.map((data) => _buildListItem(context, data)).toList(),
+      ),
     );
   }
 
