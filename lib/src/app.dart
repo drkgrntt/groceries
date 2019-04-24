@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import './screens/grocery_list.dart';
+import './blocs/groceries_provider.dart';
 
 class App extends StatelessWidget {
 
@@ -7,9 +8,11 @@ class App extends StatelessWidget {
   
   Widget build(BuildContext context) {
 
-    return MaterialApp(
-      title: 'Groceries',
-      home: GroceryList(),
+    return GroceriesProvider(
+      child: MaterialApp(
+        title: 'Groceries',
+        home: GroceryList(),
+      ),
     );
   }
 }

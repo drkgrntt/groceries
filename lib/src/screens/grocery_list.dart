@@ -1,49 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/record.dart';
+import '../models/grocery_model.dart';
+import '../blocs/groceries_provider.dart';
+import '../widgets/grocery_list_item.dart';
 
 
-class GroceryList extends StatefulWidget {
-
-  @override
-
-  _GroceryListState createState() {
-
-    return _GroceryListState();
-  }
-}
-
-
-class _GroceryListState extends State<GroceryList> {
+class GroceryList extends StatelessWidget {
   
-  @override
 
   Widget build(BuildContext context) {
 
+    // TODO: Move this to app.dart
+    final groceriesBloc = GroceriesProvider.of(context);
+    groceriesBloc.fetchGroceries();
+
     return Scaffold(
       appBar: AppBar(title: Text('Grocery List')),
-      body: _buildBody(context),
+      body: _buildBody(groceriesBloc),
     );
   }
 
 
-  Widget _buildBody(BuildContext context) {
+  Widget _buildBody(GroceriesBloc groceriesBloc) {
 
-    return StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance.collection('groceries').snapshots(),
-      builder: (context, snapshot) {
+    return StreamBuilder(
+      stream: groceriesBloc.groceries,
+      builder: (context, AsyncSnapshot<List<GroceryModel>>snapshot) {
 
         if (!snapshot.hasData) {
-          return LinearProgressIndicator();
+          return Center(child: CircularProgressIndicator());
         }
 
-        return _buildList(context, snapshot.data.documents);
+        return _buildList(context, snapshot.data);
       }
     );
   }
 
 
-  Widget _buildList(BuildContext context, List<DocumentSnapshot> snapshot) {
+  Widget _buildList(BuildContext context, List<GroceryModel> snapshot) {
 
     return ListView(
       padding: const EdgeInsets.only(top: 20.0),
@@ -52,32 +45,12 @@ class _GroceryListState extends State<GroceryList> {
   }
 
 
-  Widget _buildListItem(BuildContext context, DocumentSnapshot data) {
-    final record = Record.fromSnapshot(data);
+  Widget _buildListItem(BuildContext context, GroceryModel grocery) {
 
     return Padding(
-      key: ValueKey(record.item),
+      key: ValueKey(grocery.item),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(5.0),
-        ),
-        child: ListTile(
-          title: Text(record.item),
-          trailing: Text(record.quantity.toString()),
-          onTap: () => Firestore.instance.runTransaction((transaction) async {
-            
-            final freshSnapshot = await transaction.get(record.reference);
-            final fresh = Record.fromSnapshot(freshSnapshot);
-
-            await transaction.update(
-              record.reference,
-              {'quantity': fresh.quantity + 1}
-            );
-          }),
-        ),
-      ),
+      child: GroceryListItem(grocery: grocery),
     );
   }
 }
