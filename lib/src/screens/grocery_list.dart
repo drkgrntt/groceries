@@ -36,29 +36,29 @@ class GroceryList extends StatelessWidget {
           return Center(child: CircularProgressIndicator());
         }
 
-        return _buildList(context, snapshot.data);
+        return _buildList(context, snapshot.data, groceriesBloc);
       }
     );
   }
 
 
-  Widget _buildList(BuildContext context, List<GroceryModel> snapshot) {
+  Widget _buildList(BuildContext context, List<GroceryModel> snapshot, GroceriesBloc groceriesBloc) {
 
     return Flexible(
       child: ListView(
         padding: const EdgeInsets.only(top: 20.0),
-        children: snapshot.map((data) => _buildListItem(context, data)).toList(),
+        children: snapshot.map((data) => _buildListItem(context, data, groceriesBloc)).toList(),
       ),
     );
   }
 
 
-  Widget _buildListItem(BuildContext context, GroceryModel grocery) {
+  Widget _buildListItem(BuildContext context, GroceryModel grocery, GroceriesBloc groceriesBloc) {
 
     return Padding(
       key: ValueKey(grocery.item),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: GroceryListItem(grocery: grocery),
+      child: GroceryListItem(grocery: grocery, groceriesBloc: groceriesBloc),
     );
   }
 }

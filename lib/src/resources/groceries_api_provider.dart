@@ -9,8 +9,25 @@ class GroceriesApiProvider {
 
   Stream<QuerySnapshot> fetchGroceries() {
 
-    final snapshot = _firestore.collection('groceries').snapshots();
-    
-    return snapshot;
+    return _firestore.collection('groceries').snapshots();
+  }
+
+
+  void toggleInCart(String id, bool value) {
+
+    _firestore.collection('groceries').document(id).updateData({ 'inCart': value });
+  }
+
+
+  void addGrocery(String grocery) {
+
+    final Map<String, dynamic> newGrocery = {
+      'item': grocery,
+      'quantity': 1,
+      'inCart': false
+    };
+
+    _firestore.collection('groceries')
+      .document().setData(newGrocery);
   }
 }

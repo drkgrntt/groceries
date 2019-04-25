@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../blocs/groceries_provider.dart';
 import '../models/grocery_model.dart';
 
 
 class GroceryListItem extends StatelessWidget {
 
   final GroceryModel grocery;
+  final GroceriesBloc groceriesBloc;
 
 
-  GroceryListItem({ this.grocery });
+  GroceryListItem({ this.grocery, this.groceriesBloc });
 
 
   Widget build(context) {
@@ -18,19 +19,25 @@ class GroceryListItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(5.0),
       ),
       child: ListTile(
-        title: Text(grocery.item),
+        title: renderText(grocery),
         trailing: Text(grocery.quantity.toString()),
-        onTap: () => Firestore.instance.runTransaction((transaction) async {
-          
-          final freshSnapshot = await transaction.get(grocery.reference);
-          final fresh = GroceryModel.fromSnapshot(freshSnapshot);
-
-          await transaction.update(
-            grocery.reference,
-            { 'quantity': fresh.quantity + 1 }
-          );
-        }),
+        onTap: () {
+          groceriesBloc.toggleInCart(grocery.id, !grocery.inCart);
+        },
       ),
     );
+  }
+
+
+  Widget renderText(GroceryModel grocery) {
+
+    if (grocery.inCart) {
+      return Text(
+        grocery.item,
+        style: TextStyle(decoration: TextDecoration.lineThrough),
+      );
+    } else {
+      return Text(grocery.item);
+    }
   }
 }

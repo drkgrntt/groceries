@@ -13,4 +13,16 @@ class Repository {
 
     return _groceriesApiProvider.fetchGroceries();
   }
+
+
+  void toggleInCart(String id, bool value) {
+
+    _groceriesApiProvider.toggleInCart(id, value);
+  }
+
+
+  void addGrocery(String groceryItem) {
+
+    _groceriesApiProvider.addGrocery(groceryItem);
+  }
 }

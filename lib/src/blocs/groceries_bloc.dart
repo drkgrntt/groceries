@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/grocery_model.dart';
@@ -10,11 +11,12 @@ class GroceriesBloc {
   final _repository = Repository();
   final _groceries = PublishSubject<List<GroceryModel>>();
   final _groceryInputText = BehaviorSubject<String>();
+  final groceryInputController = TextEditingController();
 
   Observable<List<GroceryModel>> get groceries => _groceries.stream;
   Stream<String> get groceryInputText => _groceryInputText.stream;
 
-  Function(String) get changeGroceryInputText => _groceryInputText.sink.add;
+  Function(String) get updateGroceryInputText => _groceryInputText.sink.add;
 
 
   void fetchGroceries() {
@@ -37,9 +39,25 @@ class GroceriesBloc {
   }
 
 
+  void toggleInCart(String id, bool value) {
+
+    _repository.toggleInCart(id, value);
+  }
+
+
+  void submitGroceryItem() {
+
+    _repository.addGrocery(_groceryInputText.value);
+
+    updateGroceryInputText('');
+    groceryInputController.clear();
+  }
+
+
   void dispose() async {
 
     await _groceries.close();
     await _groceryInputText.close();
+    groceryInputController.dispose();
   }
 }

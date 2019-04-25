@@ -25,12 +25,13 @@ class GroceryItemInput extends StatelessWidget {
 
         return Flexible(
           child: TextField(
-            onChanged: groceriesBloc.changeGroceryInputText,
+            onChanged: groceriesBloc.updateGroceryInputText,
             decoration: InputDecoration(
-              hintText: 'Bread',
+              hintText: 'Nuts',
               labelText: 'Grocery Item',
               contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
             ),
+            controller: groceriesBloc.groceryInputController
           ),
         );
       },
@@ -50,7 +51,7 @@ class GroceryItemInput extends StatelessWidget {
           textColor: Colors.white,
           onPressed: () {
             if (snapshot.data != null && snapshot.data != '') {
-              print('submitted!');
+              groceriesBloc.submitGroceryItem();
             }
           },
         );
