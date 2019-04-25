@@ -15,7 +15,19 @@ class GroceryList extends StatelessWidget {
     groceriesBloc.fetchGroceries();
 
     return Scaffold(
-      appBar: AppBar(title: Text('Grocery List')),
+      appBar: AppBar(
+        title: Text('Grocery List'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.check),
+            tooltip: "Clear groceries in cart",
+            color: Colors.white,
+            onPressed: () {
+              groceriesBloc.clearInCart();
+            }
+          ),
+        ]
+      ),
       body: Column(
         children: [
           _buildBody(groceriesBloc),

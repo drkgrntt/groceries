@@ -15,6 +15,12 @@ class Repository {
   }
 
 
+  void clearInCart() {
+
+    _groceriesApiProvider.clearInCart();
+  }
+
+
   void toggleInCart(String id, bool value) {
 
     _groceriesApiProvider.toggleInCart(id, value);

@@ -39,6 +39,12 @@ class GroceriesBloc {
   }
 
 
+  void clearInCart() {
+
+    _repository.clearInCart();
+  }
+
+
   void toggleInCart(String id, bool value) {
 
     _repository.toggleInCart(id, value);

@@ -19,6 +19,19 @@ class GroceriesApiProvider {
   }
 
 
+  void clearInCart() {
+
+    _firestore.collection('groceries').getDocuments()
+      .then((data) {
+        data.documents.forEach((document) {
+          if (document.data['inCart']) {
+            _firestore.collection('groceries').document(document.documentID).delete();
+          }
+        });
+      });
+  }
+
+
   void addGrocery(String grocery) {
 
     final Map<String, dynamic> newGrocery = {
