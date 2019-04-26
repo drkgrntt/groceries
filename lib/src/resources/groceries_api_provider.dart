@@ -32,15 +32,9 @@ class GroceriesApiProvider {
   }
 
 
-  void addGrocery(String grocery) {
-
-    final Map<String, dynamic> newGrocery = {
-      'item': grocery,
-      'quantity': 1,
-      'inCart': false
-    };
+  void addGrocery(Map<String, dynamic> grocery) {
 
     _firestore.collection('groceries')
-      .document().setData(newGrocery);
+      .document().setData(grocery);
   }
 }

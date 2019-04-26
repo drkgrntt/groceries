@@ -8,30 +8,18 @@ class GroceryItemInput extends StatelessWidget {
 
     final groceriesBloc = GroceriesProvider.of(context);
 
-    return Row(
-      children: [
-        textField(groceriesBloc),
-        submitButton(groceriesBloc),
-      ],
-    );
-  }
-
-
-  Widget textField(GroceriesBloc groceriesBloc) {
-
     return StreamBuilder(
       stream: groceriesBloc.groceryInputText,
       builder: (context, snapshot) {
 
-        return Flexible(
-          child: TextField(
-            onChanged: groceriesBloc.updateGroceryInputText,
-            decoration: InputDecoration(
-              hintText: 'Nuts',
-              labelText: 'Grocery Item',
-              contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
-            ),
-            controller: groceriesBloc.groceryInputController
+        return Container(
+          margin: EdgeInsets.symmetric(horizontal: 10.0),
+          child: Row(
+            children: [
+              textField(groceriesBloc),
+              numberField(groceriesBloc),
+              submitButton(groceriesBloc, snapshot),
+            ],
           ),
         );
       },
@@ -39,25 +27,52 @@ class GroceryItemInput extends StatelessWidget {
   }
 
 
-  Widget submitButton(GroceriesBloc groceriesBloc) {
+  Widget numberField(GroceriesBloc groceriesBloc) {
 
-    return StreamBuilder(
-      stream: groceriesBloc.groceryInputText,
-      builder: (context, snapshot) {
-
-        return RaisedButton(
-          child: Text('Add'),
-          color: Colors.blue,
-          textColor: Colors.white,
-          onPressed: () {
-            if (snapshot.data != null && snapshot.data != '') {
-              groceriesBloc.submitGroceryItem();
-            }
-          },
-        );
-      }
+    return Container(
+      width: 80.0,
+      margin: EdgeInsets.symmetric(horizontal: 10.0),
+      child: TextField(
+        onChanged: groceriesBloc.updateGroceryQuantity,
+        controller: groceriesBloc.groceryQuantityController,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+          hintText: '2',
+          labelText: 'Quantity',
+          contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
+        ),
+      ),
     );
-    
+  }
 
+
+  Widget textField(GroceriesBloc groceriesBloc) {
+
+    return Flexible(
+      child: TextField(
+        onChanged: groceriesBloc.updateGroceryInputText,
+        controller: groceriesBloc.groceryInputController,
+        decoration: InputDecoration(
+          hintText: 'Nuts',
+          labelText: 'Grocery Item',
+          contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
+        ),
+      ),
+    );
+  }
+
+
+  Widget submitButton(GroceriesBloc groceriesBloc, AsyncSnapshot snapshot) {
+
+    return RaisedButton(
+      child: Text('Add'),
+      color: Colors.blue,
+      textColor: Colors.white,
+      onPressed: () {
+        if (snapshot.data != null && snapshot.data != '') {
+          groceriesBloc.submitGroceryItem();
+        }
+      },
+    );
   }
 }

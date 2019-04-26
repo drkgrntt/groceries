@@ -19,8 +19,8 @@ class GroceryListItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(5.0),
       ),
       child: ListTile(
-        title: renderText(grocery),
-        trailing: Text(grocery.quantity.toString()),
+        title: renderText(grocery.inCart, grocery.item),
+        trailing: renderText(grocery.inCart, grocery.quantity.toString()),
         onTap: () {
           groceriesBloc.toggleInCart(grocery.id, !grocery.inCart);
         },
@@ -29,15 +29,24 @@ class GroceryListItem extends StatelessWidget {
   }
 
 
-  Widget renderText(GroceryModel grocery) {
+  Widget renderText(bool inCart, String text) {
 
-    if (grocery.inCart) {
+    if (inCart) {
       return Text(
-        grocery.item,
-        style: TextStyle(decoration: TextDecoration.lineThrough),
+        " " + text + " ",
+        style: TextStyle(
+          fontSize: 25.0,
+          color: Colors.grey,
+          decoration: TextDecoration.lineThrough,
+        ),
       );
     } else {
-      return Text(grocery.item);
+      return Text(
+        " " + text + " ",
+        style: TextStyle(
+          fontSize: 25.0,
+        ),
+      );
     }
   }
 }

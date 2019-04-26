@@ -11,12 +11,16 @@ class GroceriesBloc {
   final _repository = Repository();
   final _groceries = PublishSubject<List<GroceryModel>>();
   final _groceryInputText = BehaviorSubject<String>();
+  final _groceryQuantity = BehaviorSubject<String>();
   final groceryInputController = TextEditingController();
+  final groceryQuantityController = TextEditingController();
 
   Observable<List<GroceryModel>> get groceries => _groceries.stream;
   Stream<String> get groceryInputText => _groceryInputText.stream;
+  Stream<String> get groceryQuantity => _groceryQuantity.stream;
 
   Function(String) get updateGroceryInputText => _groceryInputText.sink.add;
+  Function(String) get updateGroceryQuantity => _groceryQuantity.sink.add;
 
 
   void fetchGroceries() {
@@ -53,10 +57,17 @@ class GroceriesBloc {
 
   void submitGroceryItem() {
 
-    _repository.addGrocery(_groceryInputText.value);
+    final Map<String, dynamic> grocery = {
+      'item': _groceryInputText.value,
+      'quantity': int.parse(_groceryQuantity.value),
+      'inCart': false
+    };
+
+    _repository.addGrocery(grocery);
 
     updateGroceryInputText('');
     groceryInputController.clear();
+    groceryQuantityController.clear();
   }
 
 
@@ -64,6 +75,8 @@ class GroceriesBloc {
 
     await _groceries.close();
     await _groceryInputText.close();
+    await _groceryQuantity.close();
     groceryInputController.dispose();
+    groceryQuantityController.dispose();
   }
 }

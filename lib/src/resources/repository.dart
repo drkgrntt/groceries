@@ -27,8 +27,8 @@ class Repository {
   }
 
 
-  void addGrocery(String groceryItem) {
+  void addGrocery(Map<String, dynamic> grocery) {
 
-    _groceriesApiProvider.addGrocery(groceryItem);
+    _groceriesApiProvider.addGrocery(grocery);
   }
 }
