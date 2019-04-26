@@ -37,4 +37,11 @@ class GroceriesApiProvider {
     _firestore.collection('groceries')
       .document().setData(grocery);
   }
+
+
+  void updateGrocery(Map<String, dynamic> grocery, String id) {
+    
+    _firestore.collection('groceries')
+      .document(id).setData(grocery);
+  }
 }

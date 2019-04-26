@@ -12,15 +12,18 @@ class GroceriesBloc {
   final _groceries = PublishSubject<List<GroceryModel>>();
   final _groceryInputText = BehaviorSubject<String>();
   final _groceryQuantity = BehaviorSubject<String>();
+  final _currentGrocery = BehaviorSubject<String>();
   final groceryInputController = TextEditingController();
   final groceryQuantityController = TextEditingController();
 
   Observable<List<GroceryModel>> get groceries => _groceries.stream;
   Stream<String> get groceryInputText => _groceryInputText.stream;
   Stream<String> get groceryQuantity => _groceryQuantity.stream;
+  Stream<String> get currentGrocery => _currentGrocery.stream;
 
   Function(String) get updateGroceryInputText => _groceryInputText.sink.add;
   Function(String) get updateGroceryQuantity => _groceryQuantity.sink.add;
+  Function(String) get updateCurrentGrocery => _currentGrocery.sink.add;
 
 
   void fetchGroceries() {
@@ -55,6 +58,19 @@ class GroceriesBloc {
   }
 
 
+  void editGrocery(GroceryModel grocery) {
+
+    // Set current grocery to the selected id
+    updateCurrentGrocery(grocery.id);
+
+    // Update the input fields and streams
+    updateGroceryInputText(grocery.item);
+    groceryInputController.text = grocery.item;
+    updateGroceryQuantity('${grocery.quantity}');
+    groceryQuantityController.text = '${grocery.quantity}';
+  }
+
+
   void submitGroceryItem() {
 
     final Map<String, dynamic> grocery = {
@@ -63,8 +79,13 @@ class GroceriesBloc {
       'inCart': false
     };
 
-    _repository.addGrocery(grocery);
+    if (_currentGrocery.value != '' && _currentGrocery.value != null) {
+      _repository.updateGrocery(grocery, _currentGrocery.value);
+    } else {
+      _repository.addGrocery(grocery);
+    }
 
+    updateCurrentGrocery('');
     updateGroceryInputText('');
     groceryInputController.clear();
     groceryQuantityController.clear();
@@ -76,6 +97,7 @@ class GroceriesBloc {
     await _groceries.close();
     await _groceryInputText.close();
     await _groceryQuantity.close();
+    await _currentGrocery.close();
     groceryInputController.dispose();
     groceryQuantityController.dispose();
   }

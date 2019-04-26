@@ -24,6 +24,9 @@ class GroceryListItem extends StatelessWidget {
         onTap: () {
           groceriesBloc.toggleInCart(grocery.id, !grocery.inCart);
         },
+        onLongPress: () {
+          groceriesBloc.editGrocery(grocery);
+        }
       ),
     );
   }

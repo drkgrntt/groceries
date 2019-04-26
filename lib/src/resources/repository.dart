@@ -31,4 +31,10 @@ class Repository {
 
     _groceriesApiProvider.addGrocery(grocery);
   }
+
+  
+  void updateGrocery(Map<String, dynamic> grocery, String id) {
+    
+    _groceriesApiProvider.updateGrocery(grocery, id);
+  }
 }
