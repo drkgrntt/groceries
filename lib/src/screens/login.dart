@@ -24,12 +24,14 @@ class LoginForm extends StatelessWidget {
       ),
       body: Container(
         margin: EdgeInsets.all(20.0),
-        child: Column(
+        child:  Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             _emailField(authBloc),
             _passwordField(authBloc),
             Container(margin: EdgeInsets.only(top: 25.0)),
-            _submitButton(authBloc, context),
+            _submitButton(authBloc),
           ],
         ),
       ),
@@ -79,15 +81,25 @@ class LoginForm extends StatelessWidget {
   }
 
 
-  Widget _submitButton(AuthBloc authBloc, BuildContext context) {
+  Widget _submitButton(AuthBloc authBloc) {
 
-    return RaisedButton(
-      child: Text('Login'),
-      textColor: Colors.white,
-      color: Colors.blue,
-      onPressed: () {
-        authBloc.submit();
-        Navigator.pushNamed(context, '/list');
+    return StreamBuilder(
+      stream: authBloc.submitValid,
+      builder: (context, snapshot) {
+        return RaisedButton(
+          child: Text('Login'),
+          textColor: Colors.white,
+          color: Colors.blue,
+          onPressed: () {
+            
+            if (snapshot.hasData) {
+              authBloc.submit();
+              Navigator.pushNamed(context, '/list');
+            } else {
+              return null;
+            }
+          },
+        );
       },
     );
   }
