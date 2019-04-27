@@ -10,9 +10,7 @@ class GroceryList extends StatelessWidget {
 
   Widget build(BuildContext context) {
 
-    // TODO: Move this to app.dart
     final groceriesBloc = GroceriesProvider.of(context);
-    groceriesBloc.fetchGroceries();
 
     return Scaffold(
       appBar: AppBar(
