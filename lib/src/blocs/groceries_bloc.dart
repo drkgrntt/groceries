@@ -1,7 +1,5 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/grocery_model.dart';
 import '../resources/repository.dart';
 
@@ -26,38 +24,42 @@ class GroceriesBloc {
   Function(String) get updateCurrentGrocery => _currentGrocery.sink.add;
 
 
-  void fetchGroceries() {
+  ///
+  /// Get a current list of groceries
+  ///
+  void fetchGroceries() async {
 
     // Get a snapshot of the grocery list
-    final Stream<QuerySnapshot> snapshot = _repository.fetchGroceries();
+    final List<GroceryModel> groceryList = await _repository.fetchGroceries();
 
-    snapshot.listen((data) {
-      final List<GroceryModel> groceryList = [];
-
-      // Fill a list with the groceries from the snapshot
-      data.documents.forEach((document) {
-        final grocery = GroceryModel.fromSnapshot(document);
-        groceryList.add(grocery);
-      });
-
-      // Add the list to the sink
-      _groceries.sink.add(groceryList);
-    });
+    // Add the list to the sink
+    _groceries.sink.add(groceryList);
   }
 
 
+  ///
+  /// Delete all groceries marked as in cart
+  ///
   void clearInCart() {
 
     _repository.clearInCart();
+    fetchGroceries();
   }
 
 
+  ///
+  /// Mark a grocery with [id] as in cart or not in cart [value]
+  /// 
   void toggleInCart(String id, bool value) {
 
     _repository.toggleInCart(id, value);
+    fetchGroceries();
   }
 
 
+  ///
+  /// Sets the selected [grocery] as editing
+  ///
   void editGrocery(GroceryModel grocery) {
 
     // Set current grocery to the selected id
@@ -71,24 +73,35 @@ class GroceriesBloc {
   }
 
 
+  ///
+  /// Creates or updates a grocery depending on the _currentGrocery value
+  ///
   void submitGroceryItem() {
 
+    // Build a map for the new grocery
     final Map<String, dynamic> grocery = {
       'item': _groceryInputText.value,
       'quantity': int.parse(_groceryQuantity.value),
       'inCart': false
     };
 
+    // Check to see if we have a current grocery we are editing
     if (_currentGrocery.value != '' && _currentGrocery.value != null) {
+
+      // If so, update the grocery with the grocery's id
       _repository.updateGrocery(grocery, _currentGrocery.value);
     } else {
+
+      // Otherwise, create a grocery
       _repository.addGrocery(grocery);
     }
 
+    // Clear streams and controllers and refetch the grocery list
     updateCurrentGrocery('');
     updateGroceryInputText('');
     groceryInputController.clear();
     groceryQuantityController.clear();
+    fetchGroceries();
   }
 
 

@@ -42,14 +42,14 @@ class GroceryList extends StatelessWidget {
 
     return StreamBuilder(
       stream: groceriesBloc.groceries,
-      builder: (context, AsyncSnapshot<List<GroceryModel>>snapshot) {
+      builder: (context, AsyncSnapshot<List<GroceryModel>> snapshot) {
 
         if (!snapshot.hasData) {
           return Center(child: CircularProgressIndicator());
         }
 
         return _buildList(context, snapshot.data, groceriesBloc);
-      }
+      },
     );
   }
 
