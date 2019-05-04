@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../blocs/auth_provider.dart';
+import '../models/user_model.dart';
 
 
 class LoginForm extends StatelessWidget {
@@ -11,16 +12,16 @@ class LoginForm extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Login!'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.format_list_bulleted),
-            tooltip: "Quick Start",
-            color: Colors.white,
-            onPressed: () {
-              Navigator.pushNamed(context, '/list');
-            }
-          ),
-        ],
+        // actions: <Widget>[
+        //   IconButton(
+        //     icon: Icon(Icons.format_list_bulleted),
+        //     tooltip: "Quick Start",
+        //     color: Colors.white,
+        //     onPressed: () {
+        //       Navigator.pushNamed(context, '/list');
+        //     }
+        //   ),
+        // ],
       ),
       body: Container(
         margin: EdgeInsets.all(20.0),
@@ -90,14 +91,18 @@ class LoginForm extends StatelessWidget {
           child: Text('Login'),
           textColor: Colors.white,
           color: Colors.blue,
-          onPressed: () {
+          onPressed: () async {
             
             if (snapshot.hasData) {
-              authBloc.submit();
-              Navigator.pushNamed(context, '/list');
+              final user = await authBloc.submit();
+
+              if (user is UserModel) {
+                Navigator.pushNamed(context, '/list/${user.id}');
+              }
             } else {
               return null;
             }
+            
           },
         );
       },

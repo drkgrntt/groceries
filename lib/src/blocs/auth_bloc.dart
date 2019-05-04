@@ -1,14 +1,20 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
+import '../resources/repository.dart';
+import '../models/user_model.dart';
 
 
 class AuthBloc {
 
+  final _repository = Repository();
+  final _currentUser = PublishSubject<UserModel>();
   final _email = BehaviorSubject<String>();
   final _password = BehaviorSubject<String>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
+  Observable<UserModel> get currentUser => _currentUser.stream;
 
   Stream<String> get email => 
     _email.stream.transform(validateEmail);
@@ -41,19 +47,27 @@ class AuthBloc {
   });
 
 
-  submit() {
+  void fetchCurrentUser() async {
+
+    final user = await _repository.fetchCurrentUser();
+    _currentUser.sink.add(user);
+  }
+
+
+  submit() async {
 
     final validEmail = _email.value;
     final validPassword = _password.value;
 
-    // TODO: Connect to api
-    print('Email: $validEmail');
-    print('Password: $validPassword');
+    final user = await _repository.login(validEmail, validPassword);
+
+    return user;
   }
 
 
   dispose() {
 
+    _currentUser.close();
     _email.close();
     _password.close();
   }

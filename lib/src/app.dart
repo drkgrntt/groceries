@@ -3,6 +3,7 @@ import './screens/grocery_list.dart';
 import './screens/login.dart';
 import './blocs/groceries_provider.dart';
 import './blocs/auth_provider.dart';
+import './models/user_model.dart';
 
 class App extends StatelessWidget {
 
@@ -22,15 +23,12 @@ class App extends StatelessWidget {
 
   Route routes(RouteSettings settings) {
 
-    if (settings.name == '/list') {
+    if (settings.name == '/') {
 
       return MaterialPageRoute(
         builder: (context) {
 
-          final groceriesBloc = GroceriesProvider.of(context);
-          groceriesBloc.fetchGroceries();
-
-          return GroceryList();
+          return LoginForm();
         },
       );
 
@@ -39,7 +37,13 @@ class App extends StatelessWidget {
       return MaterialPageRoute(
         builder: (context) {
 
-          return LoginForm();
+          final authBloc = AuthProvider.of(context);
+          authBloc.fetchCurrentUser();
+
+          final groceriesBloc = GroceriesProvider.of(context);
+          groceriesBloc.fetchLists(authBloc.currentUser);
+
+          return GroceryList();
         },
       );
     }

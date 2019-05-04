@@ -1,27 +1,57 @@
 import '../models/grocery_model.dart';
-import 'groceries_fs_provider.dart';
+import '../models/grocery_list_model.dart';
+import '../models/user_model.dart';
+import 'cloud_firestore_provider.dart';
+import 'firebase_provider.dart';
 
 
 class Repository {
 
-  final GroceriesFsProvider _groceriesFsProvider = GroceriesFsProvider();
+  final CloudFirestoreProvider _cloudFirestoreProvider = CloudFirestoreProvider();
+  final FirebaseProvider _firebaseProvider = FirebaseProvider();
+
+
+  Future<UserModel> login(String email, String password) async {
+
+    final user = await _firebaseProvider.login(email, password);
+    return await fetchUserData(user.uid);
+  }
+
+
+  Future<UserModel> fetchCurrentUser() async {
+
+    final user = await _firebaseProvider.fetchCurrentUser();
+    return await fetchUserData(user.uid);
+  }
+
+
+  Future<UserModel> fetchUserData(String userId) async {
+
+    return await _cloudFirestoreProvider.fetchUser(userId);
+  }
+
+
+  Future<List<GroceryListModel>> fetchLists(List<String> listIds) async {
+
+    return await _cloudFirestoreProvider.fetchGroceryLists(listIds);
+  }
 
 
   ///
   /// Fetch the current grocery list from the firestore provider
   ///
-  Future<List<GroceryModel>> fetchGroceries() async {
+  Future<List<GroceryModel>> fetchGroceries(List<String> groceryIds) async {
 
-    return await _groceriesFsProvider.fetchGroceries();
+    return await _cloudFirestoreProvider.fetchGroceries(groceryIds);
   }
 
 
   ///
   /// Tell the firestore provider to remove groceries marked as inCart
   ///
-  void clearInCart() {
+  Future<List<String>> clearInCart(String listId) async {
 
-    _groceriesFsProvider.clearInCart();
+    return await _cloudFirestoreProvider.clearInCart(listId);
   }
 
 
@@ -31,16 +61,16 @@ class Repository {
   /// 
   void toggleInCart(String id, bool value) {
 
-    _groceriesFsProvider.toggleInCart(id, value);
+    _cloudFirestoreProvider.toggleInCart(id, value);
   }
 
 
   ///
   /// Tell the firestore provider to add a [grocery] to the list
   ///
-  void addGrocery(Map<String, dynamic> grocery) {
+  Future<GroceryModel> addGrocery(Map<String, dynamic> grocery, String listId) async {
 
-    _groceriesFsProvider.addGrocery(grocery);
+    return await _cloudFirestoreProvider.addGrocery(grocery, listId);
   }
 
   
@@ -50,6 +80,6 @@ class Repository {
   ///
   void updateGrocery(Map<String, dynamic> grocery, String id) {
     
-    _groceriesFsProvider.updateGrocery(grocery, id);
+    _cloudFirestoreProvider.updateGrocery(grocery, id);
   }
 }

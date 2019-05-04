@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../blocs/groceries_provider.dart';
+import '../blocs/auth_provider.dart';
 import '../models/grocery_model.dart';
 
 
@@ -7,9 +8,10 @@ class GroceryListItem extends StatelessWidget {
 
   final GroceryModel grocery;
   final GroceriesBloc groceriesBloc;
+  final AuthBloc authBloc;
 
 
-  GroceryListItem({ this.grocery, this.groceriesBloc });
+  GroceryListItem({ this.grocery, this.groceriesBloc, this.authBloc });
 
 
   Widget build(context) {
