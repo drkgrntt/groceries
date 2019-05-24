@@ -3,10 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class GroceryModel {
 
-  final String id;
-  final String item;
-  final int quantity;
-  final bool inCart;
+  String id;
+  String item;
+  int quantity;
+  bool inCart;
 
 
   GroceryModel.fromMap(String id, Map<String, dynamic> map)

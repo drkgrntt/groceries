@@ -24,7 +24,7 @@ class GroceryListItem extends StatelessWidget {
         title: renderText(grocery.inCart, grocery.item),
         trailing: renderText(grocery.inCart, grocery.quantity.toString()),
         onTap: () {
-          groceriesBloc.toggleInCart(grocery.id, !grocery.inCart);
+          groceriesBloc.toggleInCart(grocery);
         },
         onLongPress: () {
           groceriesBloc.editGrocery(grocery);

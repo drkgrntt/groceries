@@ -1,22 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'grocery_model.dart';
-import 'user_model.dart';
 
 
 class GroceryListModel {
 
-  final String id;
-  final String title;
-  final List<String> groceries;
+  String id;
+  String title;
+  List<GroceryModel> groceries;
 
 
-  GroceryListModel.fromMap(String id, Map<String, dynamic> map, List<String> groceries)
+  GroceryListModel.fromMap(String id, Map<String, dynamic> map, List<GroceryModel> groceries)
     : id = id,
       title = map['title'],
       groceries = groceries;
 
 
-  GroceryListModel.fromSnapshot(DocumentSnapshot snapshot, List<String> groceries)
+  GroceryListModel.fromSnapshot(DocumentSnapshot snapshot, List<GroceryModel> groceries)
     : this.fromMap(
         snapshot.documentID,
         snapshot.data,

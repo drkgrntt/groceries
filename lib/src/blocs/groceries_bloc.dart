@@ -14,7 +14,7 @@ class GroceriesBloc {
   final _groceryInputText = BehaviorSubject<String>();
   final _groceryQuantity = BehaviorSubject<String>();
   final _currentList = BehaviorSubject<GroceryListModel>();
-  final _currentGrocery = BehaviorSubject<String>();
+  final _currentGrocery = BehaviorSubject<GroceryModel>();
   final groceryInputController = TextEditingController();
   final groceryQuantityController = TextEditingController();
 
@@ -22,28 +22,32 @@ class GroceriesBloc {
   Observable<List<GroceryListModel>> get lists => _lists.stream;
   Observable<List<GroceryModel>> get groceries => _groceries.stream;
   Stream<GroceryListModel> get currentList => _currentList.stream;
-  Stream<String> get currentGrocery => _currentGrocery.stream;
+  Stream<GroceryModel> get currentGrocery => _currentGrocery.stream;
   Stream<String> get groceryInputText => _groceryInputText.stream;
   Stream<String> get groceryQuantity => _groceryQuantity.stream;
 
   Function(String) get updateGroceryInputText => _groceryInputText.sink.add;
   Function(String) get updateGroceryQuantity => _groceryQuantity.sink.add;
   Function(GroceryListModel) get updateCurrentList => _currentList.sink.add;
-  Function(String) get updateCurrentGrocery => _currentGrocery.sink.add;
+  Function(GroceryModel) get updateCurrentGrocery => _currentGrocery.sink.add;
 
 
   ///
   /// Get a current list of groceries
   ///
-  void fetchGroceries() {
+  void fetchGroceries({bool fromDatabase: false}) {
 
-    currentList.listen((GroceryListModel list) async {
+    if (fromDatabase) {
 
-      // Get the groceries for the current list
-      List<GroceryModel> groceries = await _repository.fetchGroceries(list.groceries);
+        // Get the groceries for the current list
+        // List<GroceryModel> groceries = await _repository.fetchGroceries(list.groceries);
 
-      _groceries.sink.add(groceries);
-    });
+    } else {
+      currentList.listen((GroceryListModel list) async {
+
+        _groceries.sink.add(list.groceries);
+      });
+    }
   }
 
 
@@ -52,10 +56,9 @@ class GroceriesBloc {
   ///
   void fetchLists(Observable<UserModel> model) {
 
-    model.listen((UserModel user) async {
+    model.listen((UserModel user) {
 
-      List<GroceryListModel> lists = await _repository.fetchLists(user.lists);
-      _lists.sink.add(lists);
+      _lists.sink.add(user.lists);
     });
   }
 
@@ -65,27 +68,57 @@ class GroceriesBloc {
   ///
   void clearInCart() async {
 
-    List<String> removedIds = await _repository.clearInCart(_currentList.value.id);
+    _repository.clearInCart(_currentList.value.id);
 
-    GroceryListModel newList = _currentList.value;
+    List<GroceryModel> newList = [];
 
-    removedIds.forEach((id) {
-      newList.groceries.remove(id);
+    _currentList.value.groceries.forEach((grocery) {
+      if (!grocery.inCart) {
+        newList.add(grocery);
+      }
     });
-    
-    _currentList.sink.add(newList);
 
-    fetchGroceries();
+    _groceries.sink.add(newList);
   }
 
 
   ///
   /// Mark a grocery with [id] as in cart or not in cart [value]
   /// 
-  void toggleInCart(String id, bool value) {
+  void toggleInCart(GroceryModel grocery) async {
 
-    _repository.toggleInCart(id, value);
-    fetchGroceries();
+    grocery.inCart = !grocery.inCart;
+
+    // Update the database
+    _repository.updateGrocery(grocery);
+
+    updateOneGroceryInList(grocery);
+  }
+
+
+  void updateOneGroceryInList(GroceryModel grocery) {
+
+    GroceryListModel list = _currentList.value;
+
+    // Make a new list
+    List<GroceryModel> newList = [];
+
+    bool found = false;
+
+    list.groceries.forEach((item) {
+      if (item.id == grocery.id) {
+        newList.add(grocery);
+        found = true;
+      } else {
+        newList.add(item);
+      }
+    });
+
+    if (!found) {
+      newList.add(grocery);
+    }
+
+    _groceries.sink.add(newList);
   }
 
 
@@ -102,7 +135,7 @@ class GroceriesBloc {
   void editGrocery(GroceryModel grocery) {
 
     // Set current grocery to the selected id
-    updateCurrentGrocery(grocery.id);
+    updateCurrentGrocery(grocery);
 
     // Update the input fields and streams
     updateGroceryInputText(grocery.item);
@@ -115,35 +148,42 @@ class GroceriesBloc {
   ///
   /// Creates or updates a grocery depending on the _currentGrocery value
   ///
-  void submitGroceryItem() async {
+  void submitGroceryItem() {
 
-    // Build a map for the new grocery
-    final Map<String, dynamic> grocery = {
-      'item': _groceryInputText.value,
-      'quantity': int.parse(_groceryQuantity.value),
-      'inCart': false
-    };
+    GroceryModel newGrocery;
 
     // Check to see if we have a current grocery we are editing
-    if (_currentGrocery.value != '' && _currentGrocery.value != null) {
+    if (_currentGrocery.value != null) {
+
+      newGrocery = _currentGrocery.value;
+      newGrocery.item = _groceryInputText.value;
+      newGrocery.quantity = int.parse(_groceryQuantity.value);
+      newGrocery.inCart = false;
 
       // If so, update the grocery with the grocery's id
-      _repository.updateGrocery(grocery, _currentGrocery.value);
+      _repository.updateGrocery(newGrocery);
+
     } else {
 
-      // Otherwise, create a grocery and add it to the grocery list
-      GroceryModel newGrocery = await _repository.addGrocery(grocery, _currentList.value.id);
-      GroceryListModel newList = _currentList.value;
-      newList.groceries.add(newGrocery.id);
-      _currentList.sink.add(newList);
+      // Build a map for the new grocery
+      final Map<String, dynamic> groceryMap = {
+        'item': _groceryInputText.value,
+        'quantity': int.parse(_groceryQuantity.value),
+        'inCart': false
+      };
+
+      // Create a grocery and add it to the grocery list
+      _repository.addGrocery(groceryMap, _currentList.value.id);
     }
 
+    // Update stream
+    updateOneGroceryInList(newGrocery);
+
     // Clear streams and controllers and refetch the grocery list
-    updateCurrentGrocery('');
+    updateCurrentGrocery(null);
     updateGroceryInputText('');
     groceryInputController.clear();
     groceryQuantityController.clear();
-    fetchGroceries();
   }
 
 

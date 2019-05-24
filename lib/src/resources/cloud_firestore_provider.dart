@@ -11,35 +11,24 @@ class CloudFirestoreProvider {
 
   Future<UserModel> fetchUser(String userId) async {
 
-    List<String> lists = [];
+    List<GroceryListModel> lists = [];
+    DocumentSnapshot userSnapshot = await _firestore.collection('users').document(userId).get();
 
-    final userSnapshot = await _firestore.collection('users').document(userId).get();
+    for (var listRef in userSnapshot.data['lists']) {
 
-    userSnapshot.data['lists'].forEach((list) {
-      lists.add(list.documentID);
-    });
+      List<GroceryModel> groceries = [];
+      DocumentSnapshot listSnapshot = await listRef.get();
 
-    return UserModel.fromSnapshot(userSnapshot, lists);
-  }
+      for (var groceryRef in listSnapshot.data['groceries']) {
+        DocumentSnapshot grocerySnapshot = await groceryRef.get();
 
-
-  Future<List<GroceryListModel>> fetchGroceryLists(List<String> listIds) async {
-
-    final List<GroceryListModel> lists = [];
-
-    for( final id in listIds ) {
-      DocumentSnapshot listSnapshot = await _firestore.collection('lists').document(id).get();
-
-      List<String> groceries = [];
-
-      listSnapshot.data['groceries'].forEach((grocery) {
-        groceries.add(grocery.documentID);
-      });
+        groceries.add(GroceryModel.fromSnapshot(grocerySnapshot));
+      }
 
       lists.add(GroceryListModel.fromSnapshot(listSnapshot, groceries));
     }
 
-    return lists;
+    return UserModel.fromSnapshot(userSnapshot, lists);
   }
 
 
@@ -67,16 +56,14 @@ class CloudFirestoreProvider {
   }
 
 
-  Future<List<String>> clearInCart(String listId) async {
+  void clearInCart(String listId) async {
 
     QuerySnapshot groceriesSnapshot = await _firestore.collection('groceries').getDocuments();
 
     List<DocumentReference> removedGroceries = [];
-    List<String> ids = [];
 
     groceriesSnapshot.documents.forEach((document) {
       if (document.data['inCart']) {
-        ids.add(document.documentID);
         removedGroceries.add(document.reference);
         _firestore.collection('groceries').document(document.documentID).delete();
       }
@@ -88,12 +75,10 @@ class CloudFirestoreProvider {
     };
 
     _firestore.collection('lists').document(listId).updateData(removedDocuments);
-
-    return ids;
   }
 
 
-  Future<GroceryModel> addGrocery(Map<String, dynamic> grocery, String listId) async {
+  void addGrocery(Map<String, dynamic> grocery, String listId) async {
 
     // Add the new item to firebase
     await _firestore.collection('groceries')
@@ -114,8 +99,6 @@ class CloudFirestoreProvider {
 
     await _firestore.collection('lists').document(listId)
       .updateData(newData);
-
-    return GroceryModel.fromSnapshot(newGrocery);
   }
 
 

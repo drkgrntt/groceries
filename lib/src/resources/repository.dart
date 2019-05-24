@@ -31,12 +31,6 @@ class Repository {
   }
 
 
-  Future<List<GroceryListModel>> fetchLists(List<String> listIds) async {
-
-    return await _cloudFirestoreProvider.fetchGroceryLists(listIds);
-  }
-
-
   ///
   /// Fetch the current grocery list from the firestore provider
   ///
@@ -49,28 +43,18 @@ class Repository {
   ///
   /// Tell the firestore provider to remove groceries marked as inCart
   ///
-  Future<List<String>> clearInCart(String listId) async {
+  void clearInCart(String listId) {
 
-    return await _cloudFirestoreProvider.clearInCart(listId);
+    _cloudFirestoreProvider.clearInCart(listId);
   }
 
 
   ///
-  /// Tell the firestore provider to mark a grocery 
-  /// with [id] as in cart or not in cart [value]
-  /// 
-  void toggleInCart(String id, bool value) {
-
-    _cloudFirestoreProvider.toggleInCart(id, value);
-  }
-
-
+  /// Tell the firestore provider to add a [grocery] to the list with [listId]
   ///
-  /// Tell the firestore provider to add a [grocery] to the list
-  ///
-  Future<GroceryModel> addGrocery(Map<String, dynamic> grocery, String listId) async {
+  void addGrocery(Map<String, dynamic> grocery, String listId) {
 
-    return await _cloudFirestoreProvider.addGrocery(grocery, listId);
+    _cloudFirestoreProvider.addGrocery(grocery, listId);
   }
 
   
@@ -78,8 +62,14 @@ class Repository {
   /// Tell the firestore provider to update the document with [id]
   /// with new information in [grocery]
   ///
-  void updateGrocery(Map<String, dynamic> grocery, String id) {
-    
-    _cloudFirestoreProvider.updateGrocery(grocery, id);
+  void updateGrocery(GroceryModel grocery) {
+
+    final Map<String, dynamic> groceryMap = {
+      'item': grocery.item,
+      'quantity': grocery.quantity,
+      'inCart': grocery.inCart
+    };
+
+    _cloudFirestoreProvider.updateGrocery(groceryMap, grocery.id);
   }
 }
