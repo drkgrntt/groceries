@@ -14,40 +14,47 @@ class GroceryList extends StatelessWidget {
 
     final groceriesBloc = GroceriesProvider.of(context);
     final authBloc = AuthProvider.of(context);
+    
+    return StreamBuilder(
+      stream: groceriesBloc.lists,
+      builder: (context, AsyncSnapshot<List<GroceryListModel>> snapshot) {
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Grocery List'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.check),
-            tooltip: "Clear groceries in cart",
-            color: Colors.white,
-            onPressed: () {
-              groceriesBloc.clearInCart();
-            }
+        if (!snapshot.hasData) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Loading . . .'),
+            ),
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        // Select the first grocery list
+        GroceryListModel currentList = snapshot.data[0];
+
+        groceriesBloc.selectList(currentList);
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(currentList.title),
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(Icons.check),
+                tooltip: "Clear groceries in cart",
+                color: Colors.white,
+                onPressed: () {
+                  groceriesBloc.clearInCart();
+                }
+              ),
+            ]
           ),
-        ]
-      ),
-      body: StreamBuilder(
-        stream: groceriesBloc.lists,
-        builder: (context, AsyncSnapshot<List<GroceryListModel>> snapshot) {
-
-          if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          // Select the first grocery list
-          groceriesBloc.selectList(snapshot.data[0]);
-
-          return Column(
+          body: Column(
             children: [
               _buildBody(groceriesBloc, authBloc),
               GroceryItemInput(),
             ],
-          );
-        }
-      ),
+          ),
+        );
+      }
     );
   }
 
