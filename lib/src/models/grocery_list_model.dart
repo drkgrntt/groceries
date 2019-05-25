@@ -6,12 +6,14 @@ class GroceryListModel {
 
   String id;
   String title;
+  bool primary;
   List<GroceryModel> groceries;
 
 
   GroceryListModel.fromMap(String id, Map<String, dynamic> map, List<GroceryModel> groceries)
     : id = id,
       title = map['title'],
+      primary = map['primary'],
       groceries = groceries;
 
 
@@ -23,5 +25,5 @@ class GroceryListModel {
       );
 
 
-  String toString() => "GroceryListModel>$title:$groceries";
+  String toString() => "GroceryListModel>$title:$groceries:$primary";
 }
