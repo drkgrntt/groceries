@@ -32,27 +32,84 @@ class GroceryList extends StatelessWidget {
         }
 
         return Scaffold(
-          appBar: AppBar(
-            title: Text(currentList.data.title),
-            actions: <Widget>[
-              IconButton(
-                icon: Icon(Icons.remove_shopping_cart),
-                tooltip: "Clear groceries in the cart",
-                color: Colors.white,
-                onPressed: () {
-                  groceriesBloc.clearInCart();
-                }
-              ),
-            ]
-          ),
-          body: Column(
-            children: [
-              _buildList(currentList.data.groceries, groceriesBloc, authBloc),
-              GroceryItemInput(),
+          appBar: _buildAppBar(currentList.data, groceriesBloc),
+          drawer: _buildDrawer(currentList.data, groceriesBloc),
+          body: _buildBody(currentList.data, groceriesBloc, authBloc),
+        );
+      },
+    );
+  }
+
+
+  Widget _buildAppBar(GroceryListModel currentList, GroceriesBloc groceriesBloc) {
+
+    return AppBar(
+      title: Text(currentList.title),
+      actions: <Widget>[
+        IconButton(
+          icon: Icon(Icons.remove_shopping_cart),
+          tooltip: "Clear groceries in the cart",
+          color: Colors.white,
+          onPressed: () {
+            groceriesBloc.clearInCart();
+          }
+        ),
+      ]
+    );
+  }
+
+
+  Widget _buildDrawer(GroceryListModel currentList, GroceriesBloc groceriesBloc) {
+
+    return StreamBuilder(
+      stream: groceriesBloc.lists,
+      builder: (context, AsyncSnapshot<List<GroceryListModel>> lists) {
+
+        if (!lists.hasData) {
+          return Drawer(
+            child: Center(child: CircularProgressIndicator())
+          );
+        }
+
+        return Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                child: Text('Lists'),
+                decoration: BoxDecoration(color: Colors.blue),
+              ), 
+              ...lists.data.map((list) => _buildDrawerItem(list, groceriesBloc, context)).toList(),
             ],
           ),
         );
       },
+    );
+  }
+
+
+  Widget _buildDrawerItem(GroceryListModel list, GroceriesBloc groceriesBloc, BuildContext context) {
+
+    return Padding(
+      key: ValueKey(list.id),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: ListTile(
+        title: Text(list.title),
+        onTap: () {
+          groceriesBloc.updateCurrentList(list);
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
+
+
+  Widget _buildBody(GroceryListModel currentList, GroceriesBloc groceriesBloc, AuthBloc authBloc) {
+    return Column(
+      children: [
+        _buildList(currentList.groceries, groceriesBloc, authBloc),
+        GroceryItemInput(),
+      ],
     );
   }
 
@@ -71,7 +128,7 @@ class GroceryList extends StatelessWidget {
   Widget _buildListItem(GroceryModel grocery, GroceriesBloc groceriesBloc, AuthBloc authBloc) {
 
     return Padding(
-      key: ValueKey(grocery.item),
+      key: ValueKey(grocery.id),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: GroceryListItem(grocery: grocery, groceriesBloc: groceriesBloc, authBloc: authBloc),
     );

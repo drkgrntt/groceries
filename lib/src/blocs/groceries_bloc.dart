@@ -9,7 +9,7 @@ import '../resources/repository.dart';
 class GroceriesBloc {
 
   final _repository = Repository();
-  final _lists = PublishSubject<List<GroceryListModel>>();
+  final _lists = BehaviorSubject<List<GroceryListModel>>();
   final _groceryInputText = BehaviorSubject<String>();
   final _groceryQuantity = BehaviorSubject<String>();
   final _currentList = BehaviorSubject<GroceryListModel>();
@@ -18,7 +18,7 @@ class GroceriesBloc {
   final groceryQuantityController = TextEditingController();
 
 
-  Observable<List<GroceryListModel>> get lists => _lists.stream;
+  Stream<List<GroceryListModel>> get lists => _lists.stream;
   Stream<GroceryListModel> get currentList => _currentList.stream;
   Stream<GroceryModel> get currentGrocery => _currentGrocery.stream;
   Stream<String> get groceryInputText => _groceryInputText.stream;
