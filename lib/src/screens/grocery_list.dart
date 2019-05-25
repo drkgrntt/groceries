@@ -12,14 +12,17 @@ class GroceryList extends StatelessWidget {
 
   Widget build(BuildContext context) {
 
+    // Get blocs
     final groceriesBloc = GroceriesProvider.of(context);
     final authBloc = AuthProvider.of(context);
     
+    // Fetch all grocery lists
     return StreamBuilder(
-      stream: groceriesBloc.lists,
-      builder: (context, AsyncSnapshot<List<GroceryListModel>> snapshot) {
+      stream: groceriesBloc.currentList,
+      builder: (context, AsyncSnapshot<GroceryListModel> currentList) {
 
-        if (!snapshot.hasData) {
+        // Render loading screen until they're loaded
+        if (!currentList.hasData) {
           return Scaffold(
             appBar: AppBar(
               title: Text('Loading . . .'),
@@ -28,17 +31,12 @@ class GroceryList extends StatelessWidget {
           );
         }
 
-        // Select the first grocery list
-        GroceryListModel currentList = snapshot.data[0];
-
-        groceriesBloc.selectList(currentList);
-
         return Scaffold(
           appBar: AppBar(
-            title: Text(currentList.title),
+            title: Text(currentList.data.title),
             actions: <Widget>[
               IconButton(
-                icon: Icon(Icons.check),
+                icon: Icon(Icons.remove_shopping_cart),
                 tooltip: "Clear groceries in cart",
                 color: Colors.white,
                 onPressed: () {
@@ -49,44 +47,28 @@ class GroceryList extends StatelessWidget {
           ),
           body: Column(
             children: [
-              _buildBody(groceriesBloc, authBloc),
+              _buildList(currentList.data.groceries, groceriesBloc, authBloc),
               GroceryItemInput(),
             ],
           ),
         );
-      }
-    );
-  }
-
-
-  Widget _buildBody(GroceriesBloc groceriesBloc, AuthBloc authBloc) {
-
-    return StreamBuilder(
-      stream: groceriesBloc.groceries,
-      builder: (context, AsyncSnapshot<List<GroceryModel>> snapshot) {
-
-        if (!snapshot.hasData) {
-          return Center(child: CircularProgressIndicator());
-        }
-
-        return _buildList(context, snapshot.data, groceriesBloc, authBloc);
       },
     );
   }
 
 
-  Widget _buildList(BuildContext context, List<GroceryModel> snapshot, GroceriesBloc groceriesBloc, AuthBloc authBloc) {
+  Widget _buildList(List<GroceryModel> list, GroceriesBloc groceriesBloc, AuthBloc authBloc) {
 
     return Flexible(
       child: ListView(
         padding: const EdgeInsets.only(top: 20.0),
-        children: snapshot.map((data) => _buildListItem(context, data, groceriesBloc, authBloc)).toList(),
+        children: list.map((grocery) => _buildListItem(grocery, groceriesBloc, authBloc)).toList(),
       ),
     );
   }
 
 
-  Widget _buildListItem(BuildContext context, GroceryModel grocery, GroceriesBloc groceriesBloc, AuthBloc authBloc) {
+  Widget _buildListItem(GroceryModel grocery, GroceriesBloc groceriesBloc, AuthBloc authBloc) {
 
     return Padding(
       key: ValueKey(grocery.item),

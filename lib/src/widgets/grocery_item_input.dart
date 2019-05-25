@@ -13,7 +13,7 @@ class GroceryItemInput extends StatelessWidget {
       builder: (context, snapshot) {
 
         return Container(
-          margin: EdgeInsets.symmetric(horizontal: 10.0),
+          margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
           child: Row(
             children: [
               textField(groceriesBloc),
@@ -64,15 +64,32 @@ class GroceryItemInput extends StatelessWidget {
 
   Widget submitButton(GroceriesBloc groceriesBloc, AsyncSnapshot snapshot) {
 
-    return RaisedButton(
-      child: Text('Add'),
-      color: Colors.blue,
-      textColor: Colors.white,
-      onPressed: () {
-        if (snapshot.data != null && snapshot.data != '') {
-          groceriesBloc.submitGroceryItem();
-        }
-      },
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey,
+            blurRadius: 7.0,
+          ),
+        ],
+        borderRadius: BorderRadius.all(Radius.circular(3.0)),
+        color: Colors.blue,
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 15.0),
+      height: 35.0,
+      child: IconButton(
+        icon: Icon(
+          Icons.add_shopping_cart,
+          size: 20.0,
+        ),
+        tooltip: "Add a grocery to cart",
+        color: Colors.white,
+        onPressed: () {
+          if (snapshot.data != null && snapshot.data != '') {
+            groceriesBloc.submitGroceryItem();
+          }
+        },
+      ),
     );
   }
 }

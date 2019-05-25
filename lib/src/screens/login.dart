@@ -9,6 +9,13 @@ class LoginForm extends StatelessWidget {
 
     final authBloc = AuthProvider.of(context);
 
+    // TODO: Remove these. This is just for convenience.
+    authBloc.emailController.text = 'drkgrntt@gmail.com';
+    authBloc.changeEmail('drkgrntt@gmail.com');
+    authBloc.passwordController.text = 'abcd1234';
+    authBloc.changePassword('abcd1234');
+
+    // Render the screen
     return Scaffold(
       appBar: AppBar(
         title: Text('Login!'),
@@ -23,11 +30,17 @@ class LoginForm extends StatelessWidget {
         //   ),
         // ],
       ),
+
+      // Render the form
       body: Container(
         margin: EdgeInsets.all(20.0),
         child:  Column(
+
+          // Put in the center of the screen
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
+
+          // Render fields
           children: <Widget>[
             _emailField(authBloc),
             _passwordField(authBloc),
@@ -39,9 +52,11 @@ class LoginForm extends StatelessWidget {
     );
   }
 
-
+  
+  // Render the email field
   Widget _emailField(AuthBloc authBloc) {
 
+    // Get the email stream
     return StreamBuilder(
       stream: authBloc.email,
       builder: (context, snapshot) {
@@ -56,13 +71,15 @@ class LoginForm extends StatelessWidget {
           ),
           controller: authBloc.emailController
         );
-      }
+      },
     );
   }
 
 
+  // Render the password field
   Widget _passwordField(AuthBloc authBloc) {
 
+    // Get the password stream
     return StreamBuilder(
       stream: authBloc.password,
       builder: (context, snapshot) {
@@ -82,11 +99,14 @@ class LoginForm extends StatelessWidget {
   }
 
 
+  // Render the submit button
   Widget _submitButton(AuthBloc authBloc) {
 
+    // Get the validator stream
     return StreamBuilder(
       stream: authBloc.submitValid,
       builder: (context, snapshot) {
+
         return RaisedButton(
           child: Text('Login'),
           textColor: Colors.white,
@@ -96,13 +116,13 @@ class LoginForm extends StatelessWidget {
             if (snapshot.hasData) {
               final user = await authBloc.submit();
 
+              // Only navigate if we got a valid user model
               if (user is UserModel) {
                 Navigator.pushNamed(context, '/list/${user.id}');
               }
             } else {
               return null;
             }
-            
           },
         );
       },

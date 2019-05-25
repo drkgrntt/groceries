@@ -32,24 +32,6 @@ class CloudFirestoreProvider {
   }
 
 
-  // ================================ //
-  //        Grocery CRUD Actions      //
-  // ================================ //
-
-
-  Future<List<GroceryModel>> fetchGroceries(List<String> groceryIds) async {
-
-    final List<GroceryModel> groceryList = [];
-
-    for( final id in groceryIds ) {
-      DocumentSnapshot grocery = await _firestore.collection('groceries').document(id).get();
-      groceryList.add(GroceryModel.fromSnapshot(grocery));
-    }
-
-    return groceryList;
-  }
-
-
   void toggleInCart(String id, bool value) {
 
     _firestore.collection('groceries').document(id).updateData({ 'inCart': value });
@@ -78,7 +60,7 @@ class CloudFirestoreProvider {
   }
 
 
-  void addGrocery(Map<String, dynamic> grocery, String listId) async {
+  Future<GroceryModel> addGrocery(Map<String, dynamic> grocery, String listId) async {
 
     // Add the new item to firebase
     await _firestore.collection('groceries')
@@ -97,8 +79,10 @@ class CloudFirestoreProvider {
       'groceries': FieldValue.arrayUnion([ newGrocery.reference ])
     };
 
-    await _firestore.collection('lists').document(listId)
+    _firestore.collection('lists').document(listId)
       .updateData(newData);
+
+    return GroceryModel.fromSnapshot(newGrocery);
   }
 
 

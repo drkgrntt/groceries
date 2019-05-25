@@ -11,10 +11,12 @@ class GroceryListItem extends StatelessWidget {
   final AuthBloc authBloc;
 
 
+  // Constructor
   GroceryListItem({ this.grocery, this.groceriesBloc, this.authBloc });
 
 
   Widget build(context) {
+
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey),
@@ -34,6 +36,7 @@ class GroceryListItem extends StatelessWidget {
   }
 
 
+  // Render text according to whether or not it is in the cart
   Widget renderText(bool inCart, String text) {
 
     if (inCart) {
