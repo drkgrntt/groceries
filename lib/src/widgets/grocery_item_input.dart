@@ -82,7 +82,7 @@ class GroceryItemInput extends StatelessWidget {
           Icons.add_shopping_cart,
           size: 20.0,
         ),
-        tooltip: "Add a grocery to cart",
+        tooltip: "Add a grocery to the list",
         color: Colors.white,
         onPressed: () {
           if (snapshot.data != null && snapshot.data != '') {

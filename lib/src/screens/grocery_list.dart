@@ -37,7 +37,7 @@ class GroceryList extends StatelessWidget {
             actions: <Widget>[
               IconButton(
                 icon: Icon(Icons.remove_shopping_cart),
-                tooltip: "Clear groceries in cart",
+                tooltip: "Clear groceries in the cart",
                 color: Colors.white,
                 onPressed: () {
                   groceriesBloc.clearInCart();

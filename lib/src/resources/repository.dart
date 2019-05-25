@@ -1,5 +1,4 @@
 import '../models/grocery_model.dart';
-import '../models/grocery_list_model.dart';
 import '../models/user_model.dart';
 import 'cloud_firestore_provider.dart';
 import 'firebase_provider.dart';
