@@ -31,6 +31,12 @@ class Repository {
   }
 
 
+  void logout() {
+
+    return _firebaseProvider.logout();
+  }
+
+
   ///
   /// Tell the firestore provider to remove groceries marked as inCart
   ///

@@ -54,14 +54,18 @@ class AuthBloc {
   }
 
 
-  submit() async {
+  Future<UserModel> submit() async {
 
-    final validEmail = _email.value;
-    final validPassword = _password.value;
+    String validEmail = _email.value;
+    String validPassword = _password.value;
 
-    final user = await _repository.login(validEmail, validPassword);
+    return await _repository.login(validEmail, validPassword);
+  }
 
-    return user;
+
+  void logout() {
+
+    _repository.logout();
   }
 
 

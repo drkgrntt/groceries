@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import '../models/user_model.dart';
 
 
 class FirebaseProvider {
@@ -16,5 +15,11 @@ class FirebaseProvider {
   Future<FirebaseUser> fetchCurrentUser() async {
 
     return await _firebase.currentUser();
+  }
+
+
+  void logout() async {
+
+    return await _firebase.signOut();
   }
 }

@@ -50,6 +50,7 @@ class GroceryItemInput extends StatelessWidget {
 
     return Flexible(
       child: TextField(
+        textCapitalization: TextCapitalization.sentences,
         onChanged: groceriesBloc.updateGroceryInputText,
         controller: groceriesBloc.groceryInputController,
         decoration: InputDecoration(

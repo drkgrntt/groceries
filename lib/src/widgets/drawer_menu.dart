@@ -1,18 +1,48 @@
 import 'package:flutter/material.dart';
 import '../blocs/groceries_provider.dart';
+import '../blocs/auth_provider.dart';
 import '../models/grocery_list_model.dart';
 
 class DrawerMenu extends StatelessWidget {
 
 
   final GroceriesBloc groceriesBloc;
+  final AuthBloc authBloc;
   final List<GroceryListModel> lists;
 
 
-  DrawerMenu({ this.groceriesBloc, this.lists });
+  DrawerMenu({ this.groceriesBloc, this.lists, this.authBloc });
 
 
   Widget build(BuildContext context) {
+
+    return Drawer(
+      child: Column(
+        children: <Widget>[
+          _buildDrawer(),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
+            child: Center(
+              child: RaisedButton(
+                child: Text('Log Out'),
+                color: Colors.red[700],
+                textColor: Colors.white,
+                onPressed: () {
+                  // Logout and go to first screen
+                  authBloc.logout();
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildDrawer() {
 
     return StreamBuilder(
       stream: groceriesBloc.currentList,
@@ -21,8 +51,8 @@ class DrawerMenu extends StatelessWidget {
         if (!snapshot.hasData) {
           return Center(child: CircularProgressIndicator());
         }
-        
-        return Drawer(
+    
+        return Flexible(
           child: ListView(
             padding: EdgeInsets.zero,
             children: <Widget>[
@@ -107,7 +137,7 @@ class DrawerMenu extends StatelessWidget {
           return ListTile(
             title: Text(
               list.title,
-              style: TextStyle(fontSize: 16.0),
+              style: _textStyle(list, currentList),
             ),
             onTap: () {
               groceriesBloc.updateCurrentList(list);
@@ -124,12 +154,28 @@ class DrawerMenu extends StatelessWidget {
   }
 
 
+  TextStyle _textStyle(GroceryListModel list, GroceryListModel currentList) {
+
+    // Indicate current list
+    if (list.id == currentList.id) {
+      return TextStyle(
+        fontSize: 16.0, 
+        fontStyle: FontStyle.italic,
+        color: Colors.blue[900],
+      );
+    } else {
+      return TextStyle(fontSize: 16.0);
+    }
+  }
+
+
   Widget _textField(GroceriesBloc groceriesBloc) {
 
     return Flexible(
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
         child: TextField(
+          textCapitalization: TextCapitalization.sentences,
           onChanged: groceriesBloc.updateListInputText,
           controller: groceriesBloc.listInputController,
           decoration: InputDecoration(

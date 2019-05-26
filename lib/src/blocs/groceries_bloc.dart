@@ -40,12 +40,18 @@ class GroceriesBloc {
   Function(GroceryModel) get updateCurrentGrocery => _currentGrocery.sink.add;
 
 
+  ///
+  /// Initialize the groceries bloc using a passed user [model] observable
+  ///
   void init (Observable<UserModel> model) {
 
+    // Get the user model from the observable
     model.listen((UserModel user) {
 
+      // Add the lists to our bloc
       _lists.sink.add(user.lists);
 
+      // If we don't have a current list
       if (_currentList.value == null) {
 
         // Select the primary list as the initial current list

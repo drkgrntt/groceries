@@ -3,7 +3,6 @@ import './screens/grocery_list.dart';
 import './screens/login.dart';
 import './blocs/groceries_provider.dart';
 import './blocs/auth_provider.dart';
-import './models/grocery_list_model.dart';
 
 // Base app component
 class App extends StatelessWidget {

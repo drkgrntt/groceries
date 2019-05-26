@@ -35,7 +35,7 @@ class GroceryList extends StatelessWidget {
 
         return Scaffold(
           appBar: _buildAppBar(currentList.data, groceriesBloc),
-          drawer: _buildDrawer(currentList.data, groceriesBloc),
+          drawer: _buildDrawer(currentList.data, groceriesBloc, authBloc),
           body: _buildBody(currentList.data, groceriesBloc, authBloc),
         );
       },
@@ -61,7 +61,7 @@ class GroceryList extends StatelessWidget {
   }
 
 
-  Widget _buildDrawer(GroceryListModel currentList, GroceriesBloc groceriesBloc) {
+  Widget _buildDrawer(GroceryListModel currentList, GroceriesBloc groceriesBloc, AuthBloc authBloc) {
 
     return StreamBuilder(
       stream: groceriesBloc.lists,
@@ -73,7 +73,7 @@ class GroceryList extends StatelessWidget {
           );
         }
 
-        return DrawerMenu(lists: lists.data, groceriesBloc: groceriesBloc);
+        return DrawerMenu(lists: lists.data, groceriesBloc: groceriesBloc, authBloc: authBloc);
       },
     );
   }
