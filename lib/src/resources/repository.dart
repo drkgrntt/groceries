@@ -1,4 +1,5 @@
 import '../models/grocery_model.dart';
+import '../models/grocery_list_model.dart';
 import '../models/user_model.dart';
 import 'cloud_firestore_provider.dart';
 import 'firebase_provider.dart';
@@ -61,5 +62,15 @@ class Repository {
     };
 
     _cloudFirestoreProvider.updateGrocery(groceryMap, grocery.id);
+  }
+
+
+  void updateList(GroceryListModel list) {
+
+    final Map<String, dynamic> listMap = {
+      'title': list.title
+    };
+
+    _cloudFirestoreProvider.updateList(listMap, list.id);
   }
 }

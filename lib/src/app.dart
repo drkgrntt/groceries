@@ -45,17 +45,7 @@ class App extends StatelessWidget {
           authBloc.fetchCurrentUser();
 
           final groceriesBloc = GroceriesProvider.of(context);
-          groceriesBloc.fetchLists(authBloc.currentUser);
-
-          // Select the primary list as the initial current list
-          groceriesBloc.lists.listen((List<GroceryListModel> lists) {
-
-            lists.forEach((list) {
-              if (list.primary) {
-                groceriesBloc.updateCurrentList(list);
-              }
-            });
-          });
+          groceriesBloc.init(authBloc.currentUser);
 
           return GroceryList();
         },

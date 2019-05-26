@@ -49,7 +49,6 @@ class CloudFirestoreProvider {
         removedGroceries.add(document.reference);
         _firestore.collection('groceries').document(document.documentID).delete();
       }
-
     });
 
     final removedDocuments = {
@@ -90,5 +89,12 @@ class CloudFirestoreProvider {
     
     _firestore.collection('groceries')
       .document(id).setData(grocery);
+  }
+
+
+  void updateList(Map<String, dynamic> list, String id) {
+
+    _firestore.collection('lists').document(id)
+      .updateData(list);
   }
 }

@@ -10,12 +10,12 @@ class GroceryItemInput extends StatelessWidget {
 
     return StreamBuilder(
       stream: groceriesBloc.groceryInputText,
-      builder: (context, snapshot) {
+      builder: (context, AsyncSnapshot snapshot) {
 
         return Container(
           margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
           child: Row(
-            children: [
+            children: <Widget>[
               textField(groceriesBloc),
               numberField(groceriesBloc),
               submitButton(groceriesBloc, snapshot),

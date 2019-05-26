@@ -10,34 +10,51 @@ class GroceriesBloc {
 
   final _repository = Repository();
   final _lists = BehaviorSubject<List<GroceryListModel>>();
+
   final _groceryInputText = BehaviorSubject<String>();
   final _groceryQuantity = BehaviorSubject<String>();
+
   final _currentList = BehaviorSubject<GroceryListModel>();
+  final _editingCurrentList = BehaviorSubject<bool>();
   final _currentGrocery = BehaviorSubject<GroceryModel>();
+
   final groceryInputController = TextEditingController();
   final groceryQuantityController = TextEditingController();
+
+  final listInputController = TextEditingController();
+  final _listInputText = BehaviorSubject<String>();
 
 
   Stream<List<GroceryListModel>> get lists => _lists.stream;
   Stream<GroceryListModel> get currentList => _currentList.stream;
+  Stream<bool> get editingCurrentList => _editingCurrentList.stream;
   Stream<GroceryModel> get currentGrocery => _currentGrocery.stream;
   Stream<String> get groceryInputText => _groceryInputText.stream;
   Stream<String> get groceryQuantity => _groceryQuantity.stream;
 
   Function(String) get updateGroceryInputText => _groceryInputText.sink.add;
   Function(String) get updateGroceryQuantity => _groceryQuantity.sink.add;
+  Function(String) get updateListInputText => _listInputText.sink.add;
   Function(GroceryListModel) get updateCurrentList => _currentList.sink.add;
+  Function(bool) get editCurrentList => _editingCurrentList.sink.add;
   Function(GroceryModel) get updateCurrentGrocery => _currentGrocery.sink.add;
 
 
-  ///
-  /// Get a list of the user's lists
-  ///
-  void fetchLists(Observable<UserModel> model) {
+  void init (Observable<UserModel> model) {
 
     model.listen((UserModel user) {
 
       _lists.sink.add(user.lists);
+
+      if (_currentList.value == null) {
+
+        // Select the primary list as the initial current list
+        _lists.value.forEach((list) {
+          if (list.primary) {
+            updateCurrentList(list);
+          }
+        });
+      }
     });
   }
 
@@ -45,7 +62,7 @@ class GroceriesBloc {
   ///
   /// Delete all groceries marked as in cart
   ///
-  void clearInCart() async {
+  void clearInCart() {
 
     // Update the DB
     _repository.clearInCart(_currentList.value.id);
@@ -70,7 +87,7 @@ class GroceriesBloc {
   ///
   /// Mark a [grocery] as in cart or not in cart
   /// 
-  void toggleInCart(GroceryModel grocery) async {
+  void toggleInCart(GroceryModel grocery) {
 
     grocery.inCart = !grocery.inCart;
 
@@ -112,7 +129,7 @@ class GroceriesBloc {
   ///
   void editGrocery(GroceryModel grocery) {
 
-    // Set current grocery to the selected id
+    // Set current grocery to the selected grocery
     updateCurrentGrocery(grocery);
 
     // Update the input fields and streams
@@ -120,6 +137,38 @@ class GroceriesBloc {
     groceryInputController.text = grocery.item;
     updateGroceryQuantity('${grocery.quantity}');
     groceryQuantityController.text = '${grocery.quantity}';
+  }
+
+
+  ///
+  /// Sets the selected [list] as editing
+  ///
+  void editList(GroceryListModel list) {
+
+    // Set the current list to the selected list and say we're editing it
+    updateCurrentList(list);
+    editCurrentList(true);
+
+    // Update the input field and stream
+    updateListInputText(list.title);
+    listInputController.text = list.title;
+  }
+
+
+  ///
+  /// Updates a grocery list's title
+  ///
+  void submitListTitle() async {
+
+    // Update the selected list
+    GroceryListModel newList = _currentList.value;
+    newList.title = _listInputText.value;
+    _repository.updateList(newList);
+
+    // Remove the editing state
+    updateListInputText('');
+    listInputController.clear();
+    editCurrentList(false);
   }
 
 
@@ -176,6 +225,8 @@ class GroceriesBloc {
     await _groceryInputText.close();
     await _groceryQuantity.close();
     await _currentList.close();
+    await _editingCurrentList.close();
     await _currentGrocery.close();
+    await _listInputText.close();
   }
 }

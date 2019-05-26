@@ -24,6 +24,7 @@ class GroceryList extends StatelessWidget {
 
         // Render loading screen until they're loaded
         if (!currentList.hasData) {
+
           return Scaffold(
             appBar: AppBar(
               title: Text('Loading . . .'),

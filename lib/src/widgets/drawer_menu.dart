@@ -14,21 +14,39 @@ class DrawerMenu extends StatelessWidget {
 
   Widget build(BuildContext context) {
 
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
+    return StreamBuilder(
+      stream: groceriesBloc.currentList,
+      builder: (context, AsyncSnapshot<GroceryListModel> snapshot) {
 
-          // Drawer header
-          _buildDrawerHeader(), 
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
+        
+        return Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
 
-          // Grocery lists
-          ...lists.map((list) => _buildDrawerItem(list, context)).toList(),
+              // Drawer header
+              _buildDrawerHeader(), 
 
-          // "Add new" option
-          _buildAddNewOption(context),
-        ],
-      ),
+              // Grocery lists
+              ...lists.map((list) {
+                return Container(
+                  key: ValueKey(list.id),
+                  margin: EdgeInsets.symmetric(horizontal: 12.0),
+                  decoration: BoxDecoration(
+                    border: Border(bottom: BorderSide(width: 1.0, color: Colors.grey)),
+                  ),
+                  child: _buildDrawerItem(list, snapshot.data, context),
+                );
+              }).toList(),
+              // "Add new" option
+              _buildAddNewOption(context),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -52,21 +70,87 @@ class DrawerMenu extends StatelessWidget {
   }
 
 
-  Widget _buildDrawerItem(GroceryListModel list, BuildContext context) {
+  Widget _buildDrawerItem(GroceryListModel list, GroceryListModel currentList, BuildContext context) {
 
-    return Container(
-      key: ValueKey(list.id),
-      margin: EdgeInsets.symmetric(horizontal: 16.0),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(width: 1.0, color: Colors.grey)),
+    return StreamBuilder(
+      stream: groceriesBloc.editingCurrentList,
+      builder: (context, AsyncSnapshot<bool> snapshot) {
+
+        if (!snapshot.hasData) {
+
+          groceriesBloc.editCurrentList(false);
+
+          // Render a grey bar as the loader
+          return Center(
+            child: Container(
+              color: Colors.grey[300],
+              margin: EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
+              padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+            ),
+          );
+        }
+
+        // If we are editing and the list item is the current list
+        if (snapshot.data && list.id == currentList.id) {
+  
+          // Render a list title input
+          return Row(
+            children: <Widget>[
+              _textField(groceriesBloc),
+              _submitButton(groceriesBloc),
+            ],
+          );
+
+        } else {
+
+          // Render a normal list item
+          return ListTile(
+            title: Text(
+              list.title,
+              style: TextStyle(fontSize: 16.0),
+            ),
+            onTap: () {
+              groceriesBloc.updateCurrentList(list);
+              groceriesBloc.editCurrentList(false);
+              Navigator.pop(context);
+            },
+            onLongPress: () {
+              groceriesBloc.editList(list);          
+            }
+          );
+        }
+      },
+    );
+  }
+
+
+  Widget _textField(GroceriesBloc groceriesBloc) {
+
+    return Flexible(
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+        child: TextField(
+          onChanged: groceriesBloc.updateListInputText,
+          controller: groceriesBloc.listInputController,
+          decoration: InputDecoration(
+            labelText: 'Grocery List Name',
+            contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
+          ),
+        ),
       ),
-      child: ListTile(
-        title: Text(list.title),
-        onTap: () {
-          groceriesBloc.updateCurrentList(list);
-          Navigator.pop(context);
-        },
-      ),
+    );
+  }
+
+
+  Widget _submitButton(GroceriesBloc groceriesBloc) {
+
+    return RaisedButton(
+      child: Text('Done'),
+      color: Colors.blue,
+      textColor: Colors.white,
+      onPressed: () {
+        groceriesBloc.submitListTitle();
+      },
     );
   }
 
@@ -77,7 +161,10 @@ class DrawerMenu extends StatelessWidget {
       key: ValueKey('addNew'),
       margin: EdgeInsets.symmetric(horizontal: 16.0),
       child: ListTile(
-        title: Text('Add new list'),
+        title: Text(
+          'Add new list',
+          style: TextStyle(fontSize: 16.0),
+        ),
         onTap: () {
           // groceriesBloc.createNewList();
           Navigator.pop(context);
