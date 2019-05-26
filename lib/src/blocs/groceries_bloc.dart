@@ -41,12 +41,12 @@ class GroceriesBloc {
 
 
   ///
-  /// Initialize the groceries bloc using a passed user [model] observable
+  /// Initialize the groceries bloc using a passed [userStream] observable
   ///
-  void init (Stream<UserModel> model) {
+  void init (Stream<UserModel> userStream) {
 
-    // Get the user model from the observable
-    model.listen((UserModel user) {
+    // Get the user model from the steram
+    userStream.listen((UserModel user) {
 
       // Add the lists to our bloc
       _lists.sink.add(user.lists);
@@ -180,16 +180,52 @@ class GroceriesBloc {
 
   ///
   /// Creates a new list document and adds it to the list belonging
-  /// to the user from the [model]
+  /// to the user from the [userStream]
   ///
-  void createList(Stream<UserModel> model) async {
+  void createList(Stream<UserModel> userStream) async {
 
-    model.listen((UserModel currentUser) async {
+    userStream.listen((UserModel currentUser) async {
 
       GroceryListModel newList = await _repository.createList(currentUser);
       updateCurrentList(newList);
       currentUser.lists.add(newList);
       _lists.sink.add(currentUser.lists);
+    });
+  }
+
+
+  ///
+  /// Deletes a provided [deletedList]
+  ///
+  void deleteList(GroceryListModel deletedList, Stream<UserModel> userStream) async {
+
+    userStream.listen((UserModel currentUser) async {
+
+      // Delete the list from the db and remove it from the user stream
+      bool deleted = await _repository.deleteList(deletedList, currentUser);
+      currentUser.lists.remove(deletedList);
+
+      // Once deleted, update the groceries bloc state
+      if (deleted) {
+
+        List<GroceryListModel> newLists = [];
+
+        _lists.value.forEach((GroceryListModel list) {
+
+        // If we just deleted the current list
+        // Select the primary list as the current list
+          if (list.primary && _currentList.value.id == deletedList.id) {
+            updateCurrentList(list);
+          }
+
+          // Update the lists stream
+          if (list.id != deletedList.id) {
+            newLists.add(list);
+          }
+        });
+
+        _lists.sink.add(newLists);
+      }
     });
   }
 

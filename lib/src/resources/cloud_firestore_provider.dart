@@ -145,4 +145,34 @@ class CloudFirestoreProvider {
 
     return GroceryListModel.fromSnapshot(newList, []);
   }
+
+
+  Future<bool> deleteList(GroceryListModel list, UserModel user) async {
+
+    // Delete the reference to the list in the user
+    DocumentReference userReference = _firestore.collection('users').document(user.id);
+    DocumentSnapshot userSnapshot = await userReference.get();
+
+    List newLists = [];
+
+    userSnapshot.data['lists'].forEach((userList) {
+      if (userList.documentID != list.id) {
+        newLists.add(userList);
+      }
+    });
+
+    userReference.updateData({ 'lists': newLists });
+
+    // Delete all groceries referenced in the list
+    DocumentReference listReference = _firestore.collection('lists').document(list.id);
+    DocumentSnapshot listSnapshot = await listReference.get();
+    listSnapshot.data['groceries'].forEach((grocery) {
+      grocery.delete();
+    });
+
+    // Delete the list
+    listReference.delete();
+
+    return true;
+  }
 }

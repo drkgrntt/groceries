@@ -152,7 +152,7 @@ class DrawerMenu extends StatelessWidget {
                         SimpleDialogOption(
                           child: Text('Yes'),
                           onPressed: () {
-                            print('Deleting ${list.title}.');
+                            groceriesBloc.deleteList(list, authBloc.currentUser);
                             Navigator.pop(context);
                           }
                         ),

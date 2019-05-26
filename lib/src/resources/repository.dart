@@ -85,4 +85,9 @@ class Repository {
 
     return await _cloudFirestoreProvider.createList(currentUser);
   }
+
+  Future<bool> deleteList(GroceryListModel list, UserModel user) async {
+
+    return await _cloudFirestoreProvider.deleteList(list, user);
+  }
 }
