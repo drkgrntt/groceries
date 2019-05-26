@@ -180,53 +180,47 @@ class GroceriesBloc {
 
   ///
   /// Creates a new list document and adds it to the list belonging
-  /// to the user from the [userStream]
+  /// to the [currentUser]
   ///
-  void createList(Stream<UserModel> userStream) async {
+  void createList(UserModel currentUser) async {
 
-    userStream.listen((UserModel currentUser) async {
-
-      GroceryListModel newList = await _repository.createList(currentUser);
-      updateCurrentList(newList);
-      currentUser.lists.add(newList);
-      _lists.sink.add(currentUser.lists);
-    });
+    GroceryListModel newList = await _repository.createList(currentUser);
+    updateCurrentList(newList);
+    currentUser.lists.add(newList);
+    _lists.sink.add(currentUser.lists);
   }
 
 
   ///
   /// Deletes a provided [deletedList]
   ///
-  void deleteList(GroceryListModel deletedList, Stream<UserModel> userStream) async {
+  void deleteList(GroceryListModel deletedList, UserModel currentUser) async {
 
-    userStream.listen((UserModel currentUser) async {
+    // Delete the list from the db and remove it from the user stream
+    bool deleted = await _repository.deleteList(deletedList, currentUser);
+    currentUser.lists.remove(deletedList);
 
-      // Delete the list from the db and remove it from the user stream
-      bool deleted = await _repository.deleteList(deletedList, currentUser);
-      currentUser.lists.remove(deletedList);
+    // Once deleted, update the groceries bloc state
+    if (deleted) {
 
-      // Once deleted, update the groceries bloc state
-      if (deleted) {
+      List<GroceryListModel> newLists = [];
 
-        List<GroceryListModel> newLists = [];
+      _lists.value.forEach((GroceryListModel list) {
 
-        _lists.value.forEach((GroceryListModel list) {
+      // If we just deleted the current list
+      // Select the primary list as the current list
+        if (list.primary && _currentList.value.id == deletedList.id) {
+          updateCurrentList(list);
+        }
 
-        // If we just deleted the current list
-        // Select the primary list as the current list
-          if (list.primary && _currentList.value.id == deletedList.id) {
-            updateCurrentList(list);
-          }
+        // Update the lists stream
+        if (list.id != deletedList.id) {
+          newLists.add(list);
+        }
+      });
 
-          // Update the lists stream
-          if (list.id != deletedList.id) {
-            newLists.add(list);
-          }
-        });
-
-        _lists.sink.add(newLists);
-      }
-    });
+      _lists.sink.add(newLists);
+    }
   }
 
 

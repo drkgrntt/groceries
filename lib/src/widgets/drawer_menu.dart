@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../blocs/groceries_provider.dart';
 import '../blocs/auth_provider.dart';
 import '../models/grocery_list_model.dart';
+import '../models/user_model.dart';
 
 class DrawerMenu extends StatelessWidget {
 
@@ -46,35 +47,45 @@ class DrawerMenu extends StatelessWidget {
 
     return StreamBuilder(
       stream: groceriesBloc.currentList,
-      builder: (context, AsyncSnapshot<GroceryListModel> snapshot) {
+      builder: (context, AsyncSnapshot<GroceryListModel> currentList) {
 
-        if (!snapshot.hasData) {
+        if (!currentList.hasData) {
           return Center(child: CircularProgressIndicator());
         }
     
-        return Flexible(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
+        return StreamBuilder(
+          stream: authBloc.currentUser,
+          builder: (context, AsyncSnapshot<UserModel> currentUser) {
 
-              // Drawer header
-              _buildDrawerHeader(), 
+            if (!currentUser.hasData) {
+              return Center(child: CircularProgressIndicator());
+            }
 
-              // Grocery lists
-              ...lists.map((list) {
-                return Container(
-                  key: ValueKey(list.id),
-                  margin: EdgeInsets.symmetric(horizontal: 12.0),
-                  decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide(width: 1.0, color: Colors.grey)),
-                  ),
-                  child: _buildDrawerItem(list, snapshot.data, context),
-                );
-              }).toList(),
-              // "Add new" option
-              _buildAddNewOption(context),
-            ],
-          ),
+            return Flexible(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: <Widget>[
+
+                  // Drawer header
+                  _buildDrawerHeader(), 
+
+                  // Grocery lists
+                  ...lists.map((list) {
+                    return Container(
+                      key: ValueKey(list.id),
+                      margin: EdgeInsets.symmetric(horizontal: 12.0),
+                      decoration: BoxDecoration(
+                        border: Border(bottom: BorderSide(width: 1.0, color: Colors.grey)),
+                      ),
+                      child: _buildDrawerItem(list, currentList.data, context, currentUser.data),
+                    );
+                  }).toList(),
+                  // "Add new" option
+                  _buildAddNewOption(context, currentUser.data),
+                ],
+              ),
+            );
+          },
         );
       },
     );
@@ -100,7 +111,7 @@ class DrawerMenu extends StatelessWidget {
   }
 
 
-  Widget _buildDrawerItem(GroceryListModel list, GroceryListModel currentList, BuildContext context) {
+  Widget _buildDrawerItem(GroceryListModel list, GroceryListModel currentList, BuildContext context, UserModel currentUser) {
 
     return StreamBuilder(
       stream: groceriesBloc.editingCurrentList,
@@ -152,7 +163,7 @@ class DrawerMenu extends StatelessWidget {
                         SimpleDialogOption(
                           child: Text('Yes'),
                           onPressed: () {
-                            groceriesBloc.deleteList(list, authBloc.currentUser);
+                            groceriesBloc.deleteList(list, currentUser);
                             Navigator.pop(context);
                           }
                         ),
@@ -230,7 +241,7 @@ class DrawerMenu extends StatelessWidget {
   }
 
 
-  Widget _buildAddNewOption(BuildContext context) {
+  Widget _buildAddNewOption(BuildContext context, UserModel currentUser) {
 
     return Container(
       key: ValueKey('addNew'),
@@ -241,7 +252,7 @@ class DrawerMenu extends StatelessWidget {
           style: TextStyle(fontSize: 16.0),
         ),
         onTap: () {
-          groceriesBloc.createList(authBloc.currentUser);
+          groceriesBloc.createList(currentUser);
           Navigator.pop(context);
         },
       ),
