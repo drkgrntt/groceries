@@ -43,7 +43,7 @@ class GroceriesBloc {
   ///
   /// Initialize the groceries bloc using a passed user [model] observable
   ///
-  void init (Observable<UserModel> model) {
+  void init (Stream<UserModel> model) {
 
     // Get the user model from the observable
     model.listen((UserModel user) {
@@ -164,7 +164,7 @@ class GroceriesBloc {
   ///
   /// Updates a grocery list's title
   ///
-  void submitListTitle() async {
+  void submitListTitle() {
 
     // Update the selected list
     GroceryListModel newList = _currentList.value;
@@ -175,6 +175,22 @@ class GroceriesBloc {
     updateListInputText('');
     listInputController.clear();
     editCurrentList(false);
+  }
+
+
+  ///
+  /// Creates a new list document and adds it to the list belonging
+  /// to the user from the [model]
+  ///
+  void createList(Stream<UserModel> model) async {
+
+    model.listen((UserModel currentUser) async {
+
+      GroceryListModel newList = await _repository.createList(currentUser);
+      updateCurrentList(newList);
+      currentUser.lists.add(newList);
+      _lists.sink.add(currentUser.lists);
+    });
   }
 
 

@@ -212,7 +212,7 @@ class DrawerMenu extends StatelessWidget {
           style: TextStyle(fontSize: 16.0),
         ),
         onTap: () {
-          // groceriesBloc.createNewList();
+          groceriesBloc.createList(authBloc.currentUser);
           Navigator.pop(context);
         },
       ),

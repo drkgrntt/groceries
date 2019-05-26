@@ -8,13 +8,13 @@ import '../models/user_model.dart';
 class AuthBloc {
 
   final _repository = Repository();
-  final _currentUser = PublishSubject<UserModel>();
+  final _currentUser = BehaviorSubject<UserModel>();
   final _email = BehaviorSubject<String>();
   final _password = BehaviorSubject<String>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  Observable<UserModel> get currentUser => _currentUser.stream;
+  Stream<UserModel> get currentUser => _currentUser.stream;
 
   Stream<String> get email => 
     _email.stream.transform(validateEmail);

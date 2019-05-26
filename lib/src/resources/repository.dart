@@ -79,4 +79,10 @@ class Repository {
 
     _cloudFirestoreProvider.updateList(listMap, list.id);
   }
+
+
+  Future<GroceryListModel> createList(currentUser) async {
+
+    return await _cloudFirestoreProvider.createList(currentUser);
+  }
 }

@@ -32,6 +32,12 @@ class CloudFirestoreProvider {
   }
 
 
+  void updateUser() {
+
+
+  }
+
+
   void toggleInCart(String id, bool value) {
 
     _firestore.collection('groceries').document(id).updateData({ 'inCart': value });
@@ -96,5 +102,47 @@ class CloudFirestoreProvider {
 
     _firestore.collection('lists').document(id)
       .updateData(list);
+  }
+
+
+  Future<String> getAvailableListTitle({ i: 1 }) async {
+
+    String title = 'New List $i';
+
+    QuerySnapshot snapshot = await _firestore.collection('lists')
+      .where('title', isEqualTo: title)
+      .getDocuments();
+
+    if (snapshot.documents.length > 0) {
+      i++;
+      return await getAvailableListTitle(i: i);
+    } else {
+      return title;
+    }
+  }
+
+
+  Future<GroceryListModel> createList(UserModel currentUser) async {
+
+    String title = await getAvailableListTitle();
+
+    await _firestore.collection('lists')
+      .document().setData({ 'title': title, 'primary': false, 'groceries': [] });
+
+    // Get the newly created list
+    QuerySnapshot snapshot = await _firestore.collection('lists')
+      .where('title', isEqualTo: title)
+      .getDocuments();
+
+    DocumentSnapshot newList = snapshot.documents[0];
+
+    final newData = {
+      'lists': FieldValue.arrayUnion([ newList.reference ])
+    };
+
+    _firestore.collection('users').document(currentUser.id)
+      .updateData(newData);
+
+    return GroceryListModel.fromSnapshot(newList, []);
   }
 }
