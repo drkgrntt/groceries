@@ -139,6 +139,35 @@ class DrawerMenu extends StatelessWidget {
               list.title,
               style: _textStyle(list, currentList),
             ),
+            trailing: !list.primary ? IconButton(
+              icon: Icon(Icons.clear),
+              color: Colors.red[700],
+              onPressed: () {
+                return showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return SimpleDialog(
+                      title: Text('Are you sure you want to delete ${list.title}?'),
+                      children: <Widget>[
+                        SimpleDialogOption(
+                          child: Text('Yes'),
+                          onPressed: () {
+                            print('Deleting ${list.title}.');
+                            Navigator.pop(context);
+                          }
+                        ),
+                        SimpleDialogOption(
+                          child: Text('No'),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          }
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
+            ) : null,
             onTap: () {
               groceriesBloc.updateCurrentList(list);
               groceriesBloc.editCurrentList(false);
