@@ -75,9 +75,19 @@ class GroceryList extends StatelessWidget {
           child: ListView(
             padding: EdgeInsets.zero,
             children: <Widget>[
-              DrawerHeader(
-                child: Text('Lists'),
-                decoration: BoxDecoration(color: Colors.blue),
+              Container(
+                height: 80.0,
+                child: DrawerHeader(
+                  child: Text(
+                    'Grocery Lists',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20.0,
+                    ),
+                  ),
+                  margin: EdgeInsets.zero,
+                  decoration: BoxDecoration(color: Colors.blue),
+                ),
               ), 
               ...lists.data.map((list) => _buildDrawerItem(list, groceriesBloc, context)).toList(),
             ],
@@ -90,9 +100,12 @@ class GroceryList extends StatelessWidget {
 
   Widget _buildDrawerItem(GroceryListModel list, GroceriesBloc groceriesBloc, BuildContext context) {
 
-    return Padding(
+    return Container(
       key: ValueKey(list.id),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      margin: EdgeInsets.symmetric(horizontal: 16.0),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(width: 1.0, color: Colors.grey)),
+      ),
       child: ListTile(
         title: Text(list.title),
         onTap: () {
@@ -118,7 +131,7 @@ class GroceryList extends StatelessWidget {
 
     return Flexible(
       child: ListView(
-        padding: const EdgeInsets.only(top: 20.0),
+        padding: EdgeInsets.only(top: 20.0),
         children: list.map((grocery) => _buildListItem(grocery, groceriesBloc, authBloc)).toList(),
       ),
     );
@@ -129,7 +142,7 @@ class GroceryList extends StatelessWidget {
 
     return Padding(
       key: ValueKey(grocery.id),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: GroceryListItem(grocery: grocery, groceriesBloc: groceriesBloc, authBloc: authBloc),
     );
   }
