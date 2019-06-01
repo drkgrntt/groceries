@@ -9,12 +9,26 @@ class Repository {
 
   final CloudFirestoreProvider _cloudFirestoreProvider = CloudFirestoreProvider();
   final FirebaseProvider _firebaseProvider = FirebaseProvider();
+  // TODO: Figure out iOS codes.
+  // These codes definitely exist on Android.
+  // I don't know if iOS uses these same codes or not.
+  final errorMessages = {
+    'ERROR_USER_NOT_FOUND': 'No user exists with this email address.',
+    'ERROR_WRONG_PASSWORD': 'Invalid password.'
+  };
 
 
-  Future<UserModel> login(String email, String password) async {
+  Future<dynamic> login(String email, String password) async {
 
-    final user = await _firebaseProvider.login(email, password);
-    return await fetchUserData(user.uid);
+    try {
+
+      final user = await _firebaseProvider.login(email, password);
+      return await fetchUserData(user.uid);
+
+    } catch (error) {
+
+      return errorMessages[error.code];
+    }
   }
 
 
@@ -49,9 +63,9 @@ class Repository {
   ///
   /// Tell the firestore provider to add a [grocery] to the list with [listId]
   ///
-  Future<GroceryModel> addGrocery(Map<String, dynamic> grocery, String listId) async {
+  Future<GroceryModel> addGrocery(Map<String, dynamic> grocery, GroceryListModel list) async {
 
-    return await _cloudFirestoreProvider.addGrocery(grocery, listId);
+    return await _cloudFirestoreProvider.addGrocery(grocery, list);
   }
 
   

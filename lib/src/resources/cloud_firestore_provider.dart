@@ -65,7 +65,13 @@ class CloudFirestoreProvider {
   }
 
 
-  Future<GroceryModel> addGrocery(Map<String, dynamic> grocery, String listId) async {
+  Future<GroceryModel> addGrocery(Map<String, dynamic> grocery, GroceryListModel list) async {
+
+    // Get the list reference
+    DocumentReference listReference = _firestore.collection('lists').document(list.id);
+
+    // Add the list reference to the grocery map
+    grocery['list'] = listReference;
 
     // Add the new item to firebase
     await _firestore.collection('groceries')
@@ -76,6 +82,7 @@ class CloudFirestoreProvider {
       .where('item', isEqualTo: grocery['item'])
       .where('quantity', isEqualTo: grocery['quantity'])
       .where('inCart', isEqualTo: grocery['inCart'])
+      .where('list', isEqualTo: grocery['list'])
       .getDocuments();
 
     DocumentSnapshot newGrocery = snapshot.documents[0];
@@ -84,8 +91,7 @@ class CloudFirestoreProvider {
       'groceries': FieldValue.arrayUnion([ newGrocery.reference ])
     };
 
-    _firestore.collection('lists').document(listId)
-      .updateData(newData);
+    listReference.updateData(newData);
 
     return GroceryModel.fromSnapshot(newGrocery);
   }
@@ -105,17 +111,20 @@ class CloudFirestoreProvider {
   }
 
 
-  Future<String> getAvailableListTitle({ i: 1 }) async {
+  String getAvailableListTitle(UserModel currentUser, { i: 1 }) {
 
     String title = 'New List $i';
+    bool titleInUse = false;
 
-    QuerySnapshot snapshot = await _firestore.collection('lists')
-      .where('title', isEqualTo: title)
-      .getDocuments();
+    currentUser.lists.forEach((GroceryListModel list) {
+      if (list.title == title) {
+        titleInUse = true;
+      }
+    });
 
-    if (snapshot.documents.length > 0) {
+    if (titleInUse) {
       i++;
-      return await getAvailableListTitle(i: i);
+      return getAvailableListTitle(currentUser, i: i);
     } else {
       return title;
     }
@@ -124,14 +133,24 @@ class CloudFirestoreProvider {
 
   Future<GroceryListModel> createList(UserModel currentUser) async {
 
-    String title = await getAvailableListTitle();
+    String title = getAvailableListTitle(currentUser);
+
+    DocumentReference userReference = _firestore.collection('users').document(currentUser.id);
+
+    Map<String, dynamic> newListData = { 
+      'title': title, 
+      'primary': false, 
+      'groceries': [],
+      'user': userReference
+    };
 
     await _firestore.collection('lists')
-      .document().setData({ 'title': title, 'primary': false, 'groceries': [] });
+      .document().setData(newListData);
 
     // Get the newly created list
     QuerySnapshot snapshot = await _firestore.collection('lists')
       .where('title', isEqualTo: title)
+      .where('user', isEqualTo: userReference)
       .getDocuments();
 
     DocumentSnapshot newList = snapshot.documents[0];

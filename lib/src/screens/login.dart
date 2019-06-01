@@ -18,7 +18,7 @@ class LoginForm extends StatelessWidget {
     // Render the screen
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login!'),
+        title: Text('Login'),
         // actions: <Widget>[
         //   IconButton(
         //     icon: Icon(Icons.format_list_bulleted),
@@ -45,6 +45,7 @@ class LoginForm extends StatelessWidget {
             _emailField(authBloc),
             _passwordField(authBloc),
             Container(margin: EdgeInsets.only(top: 25.0)),
+            _authValidation(authBloc),
             _submitButton(authBloc),
           ],
         ),
@@ -95,6 +96,31 @@ class LoginForm extends StatelessWidget {
           controller: authBloc.passwordController,
         );
       }
+    );
+  }
+
+
+  Widget _authValidation(AuthBloc authBloc) {
+
+    // Get the validator stream
+    return StreamBuilder(
+      stream: authBloc.validationMessage,
+      builder: (context, snapshot) {
+      
+        if (!snapshot.hasData) {
+          return Container(margin: EdgeInsets.only(top: 25.0));
+        }
+
+        return Center(
+          child: Text(
+            snapshot.data,
+            style: TextStyle(
+              color: Colors.red[700],
+              fontStyle: FontStyle.italic
+            ),
+          ),
+        );
+      },
     );
   }
 

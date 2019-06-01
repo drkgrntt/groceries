@@ -255,7 +255,7 @@ class GroceriesBloc {
       };
 
       // Create a grocery and add it to the grocery list
-      newGrocery = await _repository.addGrocery(groceryMap, _currentList.value.id);
+      newGrocery = await _repository.addGrocery(groceryMap, _currentList.value);
 
       created = true;
     }

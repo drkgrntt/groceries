@@ -11,6 +11,7 @@ class AuthBloc {
   final _currentUser = BehaviorSubject<UserModel>();
   final _email = BehaviorSubject<String>();
   final _password = BehaviorSubject<String>();
+  final _validationMessage = BehaviorSubject<String>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
@@ -21,12 +22,16 @@ class AuthBloc {
 
   Stream<String> get password => 
     _password.stream.transform(validatePassword);
+
+  Stream<String> get validationMessage =>
+    _validationMessage.stream;
     
   Stream<bool> get submitValid =>
     Observable.combineLatest2(email, password, (e, p) => true);
 
   Function(String) get changeEmail => _email.sink.add;
   Function(String) get changePassword => _password.sink.add;
+  Function(String) get changeValidationMessage => _validationMessage.sink.add;
 
 
   final validateEmail = StreamTransformer<String, String>.fromHandlers(handleData: (email, sink) {
@@ -54,12 +59,21 @@ class AuthBloc {
   }
 
 
-  Future<UserModel> submit() async {
+  Future<dynamic> submit() async {
+
+    changeValidationMessage('Logging you in.');
 
     String validEmail = _email.value;
     String validPassword = _password.value;
 
-    return await _repository.login(validEmail, validPassword);
+    final user = await _repository.login(validEmail, validPassword);
+    
+    if (user is String) {
+      return changeValidationMessage(user);
+    } else {
+      changeValidationMessage('');
+      return user;
+    }
   }
 
 
@@ -74,5 +88,6 @@ class AuthBloc {
     _currentUser.close();
     _email.close();
     _password.close();
+    _validationMessage.close();
   }
 }

@@ -7,7 +7,7 @@ class FirebaseProvider {
   final FirebaseAuth _firebase = FirebaseAuth.instance;
 
 
-  Future<FirebaseUser> login(String email, String password) async {
+  Future<dynamic> login(String email, String password) async {
 
     return await _firebase.signInWithEmailAndPassword(email: email, password: password);
   }
